@@ -1,0 +1,137 @@
+syntax = "proto3";
+package sockcast.v1;
+
+option go_package = "github.com/theraphim/sockcast-proto/gen/go/sockcast/v1;sockcastv1";
+
+enum NodeRole {
+  NODE_ROLE_UNSPECIFIED = 0;
+  NODE_ROLE_RELAY = 1;
+  NODE_ROLE_CLIENT = 2;
+}
+
+// Signed by the User's Root Ed25519 private key.
+message NodeGrant {
+  string user_id = 1;               // Derived from or paired with user_pubkey
+  bytes user_pubkey = 2;            // 32-byte Ed25519 user root public key
+  string node_id = 3;               // e.g. "server-x.infra.local" or "macbook-pro"
+  NodeRole role = 4;                // RELAY or CLIENT
+  bytes node_pubkey = 5;            // 32-byte Ed25519 node public key
+  uint64 issued_at_unix_sec = 6;
+  uint64 expires_at_unix_sec = 7;   // 0 = no expiration
+  bytes user_signature = 8;         // 64-byte Ed25519 signature by user_privkey
+}
+
+// Attached to RPC calls to prove possession of node_privkey.
+message NodeAuth {
+  NodeGrant grant = 1;
+  uint64 timestamp_unix_ms = 2;
+  bytes nonce = 3;
+  bytes node_signature = 4;         // Signs canonical ("sockcast-rpc-auth-v1" || grant.user_signature || timestamp || nonce)
+}
+
+message PublicKey {
+  bytes key_blob = 1;
+  string comment = 2;
+  string fingerprint_sha256 = 3;
+  string key_type = 4;              // e.g. "ssh-ed25519"
+}
+
+message ProcessAncestor {
+  uint32 pid = 1;
+  string comm = 2;                  // e.g. "scp", "zsh", "zellij"
+  string cmdline = 3;               // e.g. "scp pkg.rpm server-y:/tmp"
+}
+
+message ProcessContext {
+  string hostname = 1;              // Must match NodeGrant.node_id
+  uint32 uid = 2;
+  uint32 pid = 3;
+  string comm = 4;                  // Direct caller binary, e.g. "ssh"
+  string cmdline = 5;               // Direct caller cmdline
+  string cwd = 6;                   // Working directory from /proc/<pid>/cwd
+  repeated ProcessAncestor ancestors = 7; // Up to 6 parent levels
+}
+
+// Extracted from RFC 4252 SSH_MSG_USERAUTH_REQUEST (packet type 50) if present.
+message SshAuthContext {
+  bool is_userauth_request = 1;
+  string target_username = 2;       // e.g. "pavel" or "root"
+  string service_name = 3;          // e.g. "ssh-connection"
+  string pubkey_algorithm = 4;      // e.g. "ssh-ed25519"
+  bytes session_id = 5;
+}
+
+// 1. Relay -> Server: Fetch cached public keys for this user
+message GetIdentitiesRequest {
+  NodeAuth auth = 1;
+}
+
+message GetIdentitiesResponse {
+  repeated PublicKey keys = 1;
+}
+
+// 2. Relay -> Server -> Client: Request cryptographic signature
+message SignRequest {
+  string request_id = 1;
+  uint64 timestamp_unix_ms = 2;
+  bytes key_blob = 3;
+  bytes data = 4;                   // Raw SSH challenge payload to sign
+  uint32 flags = 5;                 // SSH_AGENT_RSA_SHA2_256 (2), SSH_AGENT_RSA_SHA2_512 (4)
+  ProcessContext process_context = 6;
+  SshAuthContext ssh_auth_context = 7;
+  NodeGrant relay_grant = 8;        // Verified end-to-end by sockcast-client
+  bytes relay_signature = 9;        // Ed25519 signature by relay's node_privkey over fields 1..8
+  NodeAuth auth = 10;               // RPC caller authentication verified by sockcast-server
+}
+
+message SignResponse {
+  string request_id = 1;
+  bool approved = 2;
+  bytes signature_blob = 3;         // Raw SSH wire format signature
+  string error_message = 4;
+  string handled_by_node_id = 5;
+}
+
+// 3. Bidirectional Stream: Client <-> Server
+message WorkstationStatus {
+  uint64 last_input_epoch_ms = 1;
+  bool force_active = 2;
+  string os = 3;                    // "macos", "windows", "linux"
+  repeated PublicKey keys = 4;      // Filtered local public keys
+}
+
+// Immediate automated receipt sent by sockcast-client within <1.5s of receiving SignRequest
+message SignAck {
+  string request_id = 1;
+}
+
+message CancelSignRequest {
+  string request_id = 1;
+  string reason = 2;                // e.g. "Handled by another workstation" or "Relay timed out"
+}
+
+message ClientStreamMessage {
+  oneof payload {
+    NodeAuth auth_handshake = 1;    // Sent as first message on stream open
+    WorkstationStatus status = 2;   // Sent every 25s and on activity/key changes
+    SignAck sign_ack = 3;           // Sent immediately when SignRequest arrives
+    SignResponse sign_response = 4; // Sent after policy auto-approve or user UI decision
+  }
+}
+
+message ServerStreamMessage {
+  oneof payload {
+    SignRequest sign_request = 1;
+    CancelSignRequest cancel_sign_request = 2;
+    uint64 server_heartbeat_epoch_ms = 3;
+  }
+}
+
+service SockcastService {
+  // Called by sockcast-relay
+  rpc GetIdentities(GetIdentitiesRequest) returns (GetIdentitiesResponse);
+  rpc Sign(SignRequest) returns (SignResponse);
+
+  // Persistent bidirectional stream maintained by sockcast-client
+  rpc ConnectWorkstation(stream ClientStreamMessage) returns (stream ServerStreamMessage);
+}
