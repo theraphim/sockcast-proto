@@ -4,6 +4,7 @@ pub mod v1 {
 
 pub mod bundle;
 pub mod crypto;
+pub(crate) mod openssh_cipher;
 pub mod p2p;
 pub mod ssh;
 
@@ -318,5 +319,119 @@ mod tests {
 
         let parsed_addr = parse_stun_binding_response(&resp, &tx_id).unwrap();
         assert_eq!(parsed_addr.to_string(), "203.0.113.42:54321");
+    }
+
+    #[test]
+    fn test_openssh_private_key_parse_and_sign() {
+        use super::ssh::{LoadedSshKey, SshKeyError};
+
+        // 1. Roundtrip in-memory PEM export + import + sign + verify
+        let key = LoadedSshKey::generate_ed25519("pavel@sockcast-test");
+        let pem = key.to_openssh_pem();
+        let parsed = LoadedSshKey::parse_openssh_pem(&pem, None).unwrap();
+        assert_eq!(parsed.key_blob(), key.key_blob());
+        assert_eq!(parsed.fingerprint_sha256(), key.fingerprint_sha256());
+        assert_eq!(parsed.comment(), "pavel@sockcast-test");
+        assert_eq!(parsed.key_type(), "ssh-ed25519");
+
+        let challenge = b"SSH2_AGENTC_SIGN_REQUEST test challenge payload";
+        let sig_blob = parsed.sign_ssh_data(challenge, 0).unwrap();
+        parsed.verify_ssh_signature_blob(challenge, &sig_blob).unwrap();
+
+        // 2. Test real ssh-keygen output (unencrypted, aes256-ctr, and chacha20-poly1305@openssh.com)
+        let tmp_dir = std::env::temp_dir().join(format!("sockcast_ssh_key_test_{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&tmp_dir);
+        std::fs::create_dir_all(&tmp_dir).unwrap();
+
+        // 2a. Unencrypted key via ssh-keygen
+        let plain_path = tmp_dir.join("id_ed25519_plain");
+        let status = std::process::Command::new("ssh-keygen")
+            .args([
+                "-q",
+                "-t",
+                "ed25519",
+                "-N",
+                "",
+                "-C",
+                "plain@test",
+                "-f",
+                plain_path.to_str().unwrap(),
+            ])
+            .status()
+            .unwrap();
+        assert!(status.success());
+        let plain_pem = std::fs::read_to_string(&plain_path).unwrap();
+        let loaded_plain = LoadedSshKey::parse_openssh_pem(&plain_pem, None).unwrap();
+        assert_eq!(loaded_plain.comment(), "plain@test");
+        let sig = loaded_plain.sign_ssh_data(challenge, 0).unwrap();
+        loaded_plain.verify_ssh_signature_blob(challenge, &sig).unwrap();
+
+        // 2b. Encrypted key with aes256-ctr (default) via ssh-keygen
+        let aes_path = tmp_dir.join("id_ed25519_aes");
+        let status = std::process::Command::new("ssh-keygen")
+            .args([
+                "-q",
+                "-t",
+                "ed25519",
+                "-a",
+                "4",
+                "-Z",
+                "aes256-ctr",
+                "-N",
+                "correct-horse-battery-staple",
+                "-C",
+                "aes@test",
+                "-f",
+                aes_path.to_str().unwrap(),
+            ])
+            .status()
+            .unwrap();
+        assert!(status.success());
+        let aes_pem = std::fs::read_to_string(&aes_path).unwrap();
+        assert!(matches!(
+            LoadedSshKey::parse_openssh_pem(&aes_pem, None),
+            Err(SshKeyError::PassphraseRequired)
+        ));
+        assert!(matches!(
+            LoadedSshKey::parse_openssh_pem(&aes_pem, Some("wrong-passphrase")),
+            Err(SshKeyError::InvalidPassphrase)
+        ));
+        let loaded_aes =
+            LoadedSshKey::parse_openssh_pem(&aes_pem, Some("correct-horse-battery-staple")).unwrap();
+        assert_eq!(loaded_aes.comment(), "aes@test");
+        let sig_aes = loaded_aes.sign_ssh_data(challenge, 0).unwrap();
+        loaded_aes.verify_ssh_signature_blob(challenge, &sig_aes).unwrap();
+
+        // 2c. Encrypted key with chacha20-poly1305@openssh.com via ssh-keygen
+        let chacha_path = tmp_dir.join("id_ed25519_chacha");
+        let status = std::process::Command::new("ssh-keygen")
+            .args([
+                "-q",
+                "-t",
+                "ed25519",
+                "-a",
+                "4",
+                "-Z",
+                "chacha20-poly1305@openssh.com",
+                "-N",
+                "chacha-passphrase",
+                "-C",
+                "chacha@test",
+                "-f",
+                chacha_path.to_str().unwrap(),
+            ])
+            .status()
+            .unwrap();
+        assert!(status.success());
+        let chacha_pem = std::fs::read_to_string(&chacha_path).unwrap();
+        let loaded_chacha =
+            LoadedSshKey::parse_openssh_pem(&chacha_pem, Some("chacha-passphrase")).unwrap();
+        assert_eq!(loaded_chacha.comment(), "chacha@test");
+        let sig_chacha = loaded_chacha.sign_ssh_data(challenge, 0).unwrap();
+        loaded_chacha
+            .verify_ssh_signature_blob(challenge, &sig_chacha)
+            .unwrap();
+
+        let _ = std::fs::remove_dir_all(&tmp_dir);
     }
 }
