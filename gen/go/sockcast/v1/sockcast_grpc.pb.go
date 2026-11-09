@@ -22,17 +22,17 @@ const (
 	SockcastService_GetIdentities_FullMethodName      = "/sockcast.v1.SockcastService/GetIdentities"
 	SockcastService_Sign_FullMethodName               = "/sockcast.v1.SockcastService/Sign"
 	SockcastService_ConnectWorkstation_FullMethodName = "/sockcast.v1.SockcastService/ConnectWorkstation"
+	SockcastService_ConnectRelay_FullMethodName       = "/sockcast.v1.SockcastService/ConnectRelay"
 )
 
 // SockcastServiceClient is the client API for SockcastService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type SockcastServiceClient interface {
-	// Called by sockcast-relay
 	GetIdentities(ctx context.Context, in *GetIdentitiesRequest, opts ...grpc.CallOption) (*GetIdentitiesResponse, error)
 	Sign(ctx context.Context, in *SignRequest, opts ...grpc.CallOption) (*SignResponse, error)
-	// Persistent bidirectional stream maintained by sockcast-client
 	ConnectWorkstation(ctx context.Context, opts ...grpc.CallOption) (grpc.BidiStreamingClient[ClientStreamMessage, ServerStreamMessage], error)
+	ConnectRelay(ctx context.Context, opts ...grpc.CallOption) (grpc.BidiStreamingClient[RelayStreamMessage, ServerToRelayMessage], error)
 }
 
 type sockcastServiceClient struct {
@@ -76,15 +76,27 @@ func (c *sockcastServiceClient) ConnectWorkstation(ctx context.Context, opts ...
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type SockcastService_ConnectWorkstationClient = grpc.BidiStreamingClient[ClientStreamMessage, ServerStreamMessage]
 
+func (c *sockcastServiceClient) ConnectRelay(ctx context.Context, opts ...grpc.CallOption) (grpc.BidiStreamingClient[RelayStreamMessage, ServerToRelayMessage], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &SockcastService_ServiceDesc.Streams[1], SockcastService_ConnectRelay_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[RelayStreamMessage, ServerToRelayMessage]{ClientStream: stream}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type SockcastService_ConnectRelayClient = grpc.BidiStreamingClient[RelayStreamMessage, ServerToRelayMessage]
+
 // SockcastServiceServer is the server API for SockcastService service.
 // All implementations must embed UnimplementedSockcastServiceServer
 // for forward compatibility.
 type SockcastServiceServer interface {
-	// Called by sockcast-relay
 	GetIdentities(context.Context, *GetIdentitiesRequest) (*GetIdentitiesResponse, error)
 	Sign(context.Context, *SignRequest) (*SignResponse, error)
-	// Persistent bidirectional stream maintained by sockcast-client
 	ConnectWorkstation(grpc.BidiStreamingServer[ClientStreamMessage, ServerStreamMessage]) error
+	ConnectRelay(grpc.BidiStreamingServer[RelayStreamMessage, ServerToRelayMessage]) error
 	mustEmbedUnimplementedSockcastServiceServer()
 }
 
@@ -103,6 +115,9 @@ func (UnimplementedSockcastServiceServer) Sign(context.Context, *SignRequest) (*
 }
 func (UnimplementedSockcastServiceServer) ConnectWorkstation(grpc.BidiStreamingServer[ClientStreamMessage, ServerStreamMessage]) error {
 	return status.Error(codes.Unimplemented, "method ConnectWorkstation not implemented")
+}
+func (UnimplementedSockcastServiceServer) ConnectRelay(grpc.BidiStreamingServer[RelayStreamMessage, ServerToRelayMessage]) error {
+	return status.Error(codes.Unimplemented, "method ConnectRelay not implemented")
 }
 func (UnimplementedSockcastServiceServer) mustEmbedUnimplementedSockcastServiceServer() {}
 func (UnimplementedSockcastServiceServer) testEmbeddedByValue()                         {}
@@ -168,6 +183,13 @@ func _SockcastService_ConnectWorkstation_Handler(srv interface{}, stream grpc.Se
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type SockcastService_ConnectWorkstationServer = grpc.BidiStreamingServer[ClientStreamMessage, ServerStreamMessage]
 
+func _SockcastService_ConnectRelay_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(SockcastServiceServer).ConnectRelay(&grpc.GenericServerStream[RelayStreamMessage, ServerToRelayMessage]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type SockcastService_ConnectRelayServer = grpc.BidiStreamingServer[RelayStreamMessage, ServerToRelayMessage]
+
 // SockcastService_ServiceDesc is the grpc.ServiceDesc for SockcastService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -188,6 +210,12 @@ var SockcastService_ServiceDesc = grpc.ServiceDesc{
 		{
 			StreamName:    "ConnectWorkstation",
 			Handler:       _SockcastService_ConnectWorkstation_Handler,
+			ServerStreams: true,
+			ClientStreams: true,
+		},
+		{
+			StreamName:    "ConnectRelay",
+			Handler:       _SockcastService_ConnectRelay_Handler,
 			ServerStreams: true,
 			ClientStreams: true,
 		},

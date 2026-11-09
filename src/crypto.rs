@@ -1,4 +1,4 @@
-use crate::v1::{NodeAuth, NodeGrant, NodeRole, SignRequest};
+use crate::v1::{NodeAuth, NodeGrant, NodeRole, SignRequest, ZellijTunnelFrame};
 use ed25519_dalek::{Signature, Signer, SigningKey, Verifier, VerifyingKey};
 use rand::RngCore;
 use thiserror::Error;
@@ -6,6 +6,7 @@ use thiserror::Error;
 pub const DOMAIN_NODE_GRANT: &[u8] = b"sockcast-node-grant-v1\x00";
 pub const DOMAIN_NODE_AUTH: &[u8] = b"sockcast-rpc-auth-v1\x00";
 pub const DOMAIN_SIGN_REQUEST: &[u8] = b"sockcast-sign-request-v1\x00";
+pub const DOMAIN_ZELLIJ_FRAME: &[u8] = b"sockcast-zellij-frame-v1\x00";
 
 pub const DEFAULT_MAX_CLOCK_SKEW_MS: u64 = 5 * 60 * 1000;
 
@@ -312,6 +313,87 @@ pub fn verify_sign_request(req: &SignRequest, now_unix_sec: u64) -> Result<(), C
 
     let msg = canonical_sign_request_bytes(req);
     relay_vk
+        .verify(&msg, &sig)
+        .map_err(|_| CryptoError::InvalidRelaySignature)
+}
+
+/// Builds the canonical byte string signed by `ZellijTunnelFrame.sender_signature`.
+pub fn canonical_zellij_frame_bytes(frame: &ZellijTunnelFrame) -> Vec<u8> {
+    let mut buf = Vec::with_capacity(256 + frame.payload.len());
+    buf.extend_from_slice(DOMAIN_ZELLIJ_FRAME);
+    if let Some(g) = &frame.sender_grant {
+        append_bytes(&mut buf, &g.user_signature);
+    } else {
+        append_bytes(&mut buf, &[]);
+    }
+    append_str(&mut buf, &frame.tunnel_id);
+    append_str(&mut buf, &frame.relay_node_id);
+    append_str(&mut buf, &frame.client_node_id);
+    append_u32(&mut buf, frame.frame_type as u32);
+    append_bytes(&mut buf, &frame.payload);
+    buf
+}
+
+/// Signs a `ZellijTunnelFrame` in-place using the sender node's Ed25519 `SigningKey`.
+pub fn sign_zellij_tunnel_frame(
+    frame: &mut ZellijTunnelFrame,
+    node_signing_key: &SigningKey,
+) -> Result<(), CryptoError> {
+    if frame.sender_grant.is_none() {
+        return Err(CryptoError::MissingGrant);
+    }
+    let msg = canonical_zellij_frame_bytes(frame);
+    let sig = node_signing_key.sign(&msg);
+    frame.sender_signature = sig.to_bytes().to_vec();
+    Ok(())
+}
+
+/// Verifies a `ZellijTunnelFrame` end-to-end against its `sender_grant` and checks that
+/// the sender's `user_pubkey` matches `expected_user_pubkey` and its role matches `expected_role`.
+pub fn verify_zellij_tunnel_frame(
+    frame: &ZellijTunnelFrame,
+    expected_role: NodeRole,
+    expected_user_pubkey: &[u8],
+    now_unix_sec: u64,
+) -> Result<(), CryptoError> {
+    let grant = frame.sender_grant.as_ref().ok_or(CryptoError::MissingGrant)?;
+    verify_node_grant(grant, now_unix_sec)?;
+
+    if grant.role != expected_role as i32 {
+        return Err(CryptoError::RoleMismatch {
+            got: grant.role,
+            expected: expected_role as i32,
+        });
+    }
+
+    if !expected_user_pubkey.is_empty() && grant.user_pubkey.as_slice() != expected_user_pubkey {
+        return Err(CryptoError::InvalidGrantSignature);
+    }
+
+    let expected_node_id = match expected_role {
+        NodeRole::Relay => &frame.relay_node_id,
+        NodeRole::Client => &frame.client_node_id,
+        NodeRole::Unspecified => &grant.node_id,
+    };
+    if &grant.node_id != expected_node_id {
+        return Err(CryptoError::HostnameMismatch {
+            hostname: expected_node_id.clone(),
+            node_id: grant.node_id.clone(),
+        });
+    }
+
+    let node_vk_bytes: [u8; 32] = grant
+        .node_pubkey
+        .as_slice()
+        .try_into()
+        .map_err(|_| CryptoError::InvalidPublicKey)?;
+    let node_vk =
+        VerifyingKey::from_bytes(&node_vk_bytes).map_err(|_| CryptoError::InvalidPublicKey)?;
+    let sig = Signature::from_slice(&frame.sender_signature)
+        .map_err(|_| CryptoError::InvalidSignature)?;
+
+    let msg = canonical_zellij_frame_bytes(frame);
+    node_vk
         .verify(&msg, &sig)
         .map_err(|_| CryptoError::InvalidRelaySignature)
 }

@@ -70,17 +70,74 @@ func (NodeRole) EnumDescriptor() ([]byte, []int) {
 	return file_sockcast_v1_sockcast_proto_rawDescGZIP(), []int{0}
 }
 
-// Signed by the User's Root Ed25519 private key.
+type ZellijFrameType int32
+
+const (
+	ZellijFrameType_ZELLIJ_FRAME_TYPE_UNSPECIFIED ZellijFrameType = 0
+	ZellijFrameType_ZELLIJ_FRAME_TYPE_OPEN        ZellijFrameType = 1
+	ZellijFrameType_ZELLIJ_FRAME_TYPE_DATA        ZellijFrameType = 2
+	ZellijFrameType_ZELLIJ_FRAME_TYPE_CLOSE       ZellijFrameType = 3
+	ZellijFrameType_ZELLIJ_FRAME_TYPE_P2P_OFFER   ZellijFrameType = 4
+	ZellijFrameType_ZELLIJ_FRAME_TYPE_P2P_ANSWER  ZellijFrameType = 5
+)
+
+// Enum value maps for ZellijFrameType.
+var (
+	ZellijFrameType_name = map[int32]string{
+		0: "ZELLIJ_FRAME_TYPE_UNSPECIFIED",
+		1: "ZELLIJ_FRAME_TYPE_OPEN",
+		2: "ZELLIJ_FRAME_TYPE_DATA",
+		3: "ZELLIJ_FRAME_TYPE_CLOSE",
+		4: "ZELLIJ_FRAME_TYPE_P2P_OFFER",
+		5: "ZELLIJ_FRAME_TYPE_P2P_ANSWER",
+	}
+	ZellijFrameType_value = map[string]int32{
+		"ZELLIJ_FRAME_TYPE_UNSPECIFIED": 0,
+		"ZELLIJ_FRAME_TYPE_OPEN":        1,
+		"ZELLIJ_FRAME_TYPE_DATA":        2,
+		"ZELLIJ_FRAME_TYPE_CLOSE":       3,
+		"ZELLIJ_FRAME_TYPE_P2P_OFFER":   4,
+		"ZELLIJ_FRAME_TYPE_P2P_ANSWER":  5,
+	}
+)
+
+func (x ZellijFrameType) Enum() *ZellijFrameType {
+	p := new(ZellijFrameType)
+	*p = x
+	return p
+}
+
+func (x ZellijFrameType) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (ZellijFrameType) Descriptor() protoreflect.EnumDescriptor {
+	return file_sockcast_v1_sockcast_proto_enumTypes[1].Descriptor()
+}
+
+func (ZellijFrameType) Type() protoreflect.EnumType {
+	return &file_sockcast_v1_sockcast_proto_enumTypes[1]
+}
+
+func (x ZellijFrameType) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use ZellijFrameType.Descriptor instead.
+func (ZellijFrameType) EnumDescriptor() ([]byte, []int) {
+	return file_sockcast_v1_sockcast_proto_rawDescGZIP(), []int{1}
+}
+
 type NodeGrant struct {
 	state            protoimpl.MessageState `protogen:"open.v1"`
-	UserId           string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`             // Derived from or paired with user_pubkey
-	UserPubkey       []byte                 `protobuf:"bytes,2,opt,name=user_pubkey,json=userPubkey,proto3" json:"user_pubkey,omitempty"` // 32-byte Ed25519 user root public key
-	NodeId           string                 `protobuf:"bytes,3,opt,name=node_id,json=nodeId,proto3" json:"node_id,omitempty"`             // e.g. "server-x.infra.local" or "macbook-pro"
-	Role             NodeRole               `protobuf:"varint,4,opt,name=role,proto3,enum=sockcast.v1.NodeRole" json:"role,omitempty"`    // RELAY or CLIENT
-	NodePubkey       []byte                 `protobuf:"bytes,5,opt,name=node_pubkey,json=nodePubkey,proto3" json:"node_pubkey,omitempty"` // 32-byte Ed25519 node public key
+	UserId           string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	UserPubkey       []byte                 `protobuf:"bytes,2,opt,name=user_pubkey,json=userPubkey,proto3" json:"user_pubkey,omitempty"`
+	NodeId           string                 `protobuf:"bytes,3,opt,name=node_id,json=nodeId,proto3" json:"node_id,omitempty"`
+	Role             NodeRole               `protobuf:"varint,4,opt,name=role,proto3,enum=sockcast.v1.NodeRole" json:"role,omitempty"`
+	NodePubkey       []byte                 `protobuf:"bytes,5,opt,name=node_pubkey,json=nodePubkey,proto3" json:"node_pubkey,omitempty"`
 	IssuedAtUnixSec  uint64                 `protobuf:"varint,6,opt,name=issued_at_unix_sec,json=issuedAtUnixSec,proto3" json:"issued_at_unix_sec,omitempty"`
-	ExpiresAtUnixSec uint64                 `protobuf:"varint,7,opt,name=expires_at_unix_sec,json=expiresAtUnixSec,proto3" json:"expires_at_unix_sec,omitempty"` // 0 = no expiration
-	UserSignature    []byte                 `protobuf:"bytes,8,opt,name=user_signature,json=userSignature,proto3" json:"user_signature,omitempty"`               // 64-byte Ed25519 signature by user_privkey
+	ExpiresAtUnixSec uint64                 `protobuf:"varint,7,opt,name=expires_at_unix_sec,json=expiresAtUnixSec,proto3" json:"expires_at_unix_sec,omitempty"`
+	UserSignature    []byte                 `protobuf:"bytes,8,opt,name=user_signature,json=userSignature,proto3" json:"user_signature,omitempty"`
 	unknownFields    protoimpl.UnknownFields
 	sizeCache        protoimpl.SizeCache
 }
@@ -171,13 +228,12 @@ func (x *NodeGrant) GetUserSignature() []byte {
 	return nil
 }
 
-// Attached to RPC calls to prove possession of node_privkey.
 type NodeAuth struct {
 	state           protoimpl.MessageState `protogen:"open.v1"`
 	Grant           *NodeGrant             `protobuf:"bytes,1,opt,name=grant,proto3" json:"grant,omitempty"`
 	TimestampUnixMs uint64                 `protobuf:"varint,2,opt,name=timestamp_unix_ms,json=timestampUnixMs,proto3" json:"timestamp_unix_ms,omitempty"`
 	Nonce           []byte                 `protobuf:"bytes,3,opt,name=nonce,proto3" json:"nonce,omitempty"`
-	NodeSignature   []byte                 `protobuf:"bytes,4,opt,name=node_signature,json=nodeSignature,proto3" json:"node_signature,omitempty"` // Signs canonical ("sockcast-rpc-auth-v1" || grant.user_signature || timestamp || nonce)
+	NodeSignature   []byte                 `protobuf:"bytes,4,opt,name=node_signature,json=nodeSignature,proto3" json:"node_signature,omitempty"`
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
@@ -245,7 +301,7 @@ type PublicKey struct {
 	KeyBlob           []byte                 `protobuf:"bytes,1,opt,name=key_blob,json=keyBlob,proto3" json:"key_blob,omitempty"`
 	Comment           string                 `protobuf:"bytes,2,opt,name=comment,proto3" json:"comment,omitempty"`
 	FingerprintSha256 string                 `protobuf:"bytes,3,opt,name=fingerprint_sha256,json=fingerprintSha256,proto3" json:"fingerprint_sha256,omitempty"`
-	KeyType           string                 `protobuf:"bytes,4,opt,name=key_type,json=keyType,proto3" json:"key_type,omitempty"` // e.g. "ssh-ed25519"
+	KeyType           string                 `protobuf:"bytes,4,opt,name=key_type,json=keyType,proto3" json:"key_type,omitempty"`
 	unknownFields     protoimpl.UnknownFields
 	sizeCache         protoimpl.SizeCache
 }
@@ -311,8 +367,8 @@ func (x *PublicKey) GetKeyType() string {
 type ProcessAncestor struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Pid           uint32                 `protobuf:"varint,1,opt,name=pid,proto3" json:"pid,omitempty"`
-	Comm          string                 `protobuf:"bytes,2,opt,name=comm,proto3" json:"comm,omitempty"`       // e.g. "scp", "zsh", "zellij"
-	Cmdline       string                 `protobuf:"bytes,3,opt,name=cmdline,proto3" json:"cmdline,omitempty"` // e.g. "scp pkg.rpm server-y:/tmp"
+	Comm          string                 `protobuf:"bytes,2,opt,name=comm,proto3" json:"comm,omitempty"`
+	Cmdline       string                 `protobuf:"bytes,3,opt,name=cmdline,proto3" json:"cmdline,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -370,13 +426,13 @@ func (x *ProcessAncestor) GetCmdline() string {
 
 type ProcessContext struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Hostname      string                 `protobuf:"bytes,1,opt,name=hostname,proto3" json:"hostname,omitempty"` // Must match NodeGrant.node_id
+	Hostname      string                 `protobuf:"bytes,1,opt,name=hostname,proto3" json:"hostname,omitempty"`
 	Uid           uint32                 `protobuf:"varint,2,opt,name=uid,proto3" json:"uid,omitempty"`
 	Pid           uint32                 `protobuf:"varint,3,opt,name=pid,proto3" json:"pid,omitempty"`
-	Comm          string                 `protobuf:"bytes,4,opt,name=comm,proto3" json:"comm,omitempty"`           // Direct caller binary, e.g. "ssh"
-	Cmdline       string                 `protobuf:"bytes,5,opt,name=cmdline,proto3" json:"cmdline,omitempty"`     // Direct caller cmdline
-	Cwd           string                 `protobuf:"bytes,6,opt,name=cwd,proto3" json:"cwd,omitempty"`             // Working directory from /proc/<pid>/cwd
-	Ancestors     []*ProcessAncestor     `protobuf:"bytes,7,rep,name=ancestors,proto3" json:"ancestors,omitempty"` // Up to 6 parent levels
+	Comm          string                 `protobuf:"bytes,4,opt,name=comm,proto3" json:"comm,omitempty"`
+	Cmdline       string                 `protobuf:"bytes,5,opt,name=cmdline,proto3" json:"cmdline,omitempty"`
+	Cwd           string                 `protobuf:"bytes,6,opt,name=cwd,proto3" json:"cwd,omitempty"`
+	Ancestors     []*ProcessAncestor     `protobuf:"bytes,7,rep,name=ancestors,proto3" json:"ancestors,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -460,13 +516,12 @@ func (x *ProcessContext) GetAncestors() []*ProcessAncestor {
 	return nil
 }
 
-// Extracted from RFC 4252 SSH_MSG_USERAUTH_REQUEST (packet type 50) if present.
 type SshAuthContext struct {
 	state             protoimpl.MessageState `protogen:"open.v1"`
 	IsUserauthRequest bool                   `protobuf:"varint,1,opt,name=is_userauth_request,json=isUserauthRequest,proto3" json:"is_userauth_request,omitempty"`
-	TargetUsername    string                 `protobuf:"bytes,2,opt,name=target_username,json=targetUsername,proto3" json:"target_username,omitempty"`    // e.g. "pavel" or "root"
-	ServiceName       string                 `protobuf:"bytes,3,opt,name=service_name,json=serviceName,proto3" json:"service_name,omitempty"`             // e.g. "ssh-connection"
-	PubkeyAlgorithm   string                 `protobuf:"bytes,4,opt,name=pubkey_algorithm,json=pubkeyAlgorithm,proto3" json:"pubkey_algorithm,omitempty"` // e.g. "ssh-ed25519"
+	TargetUsername    string                 `protobuf:"bytes,2,opt,name=target_username,json=targetUsername,proto3" json:"target_username,omitempty"`
+	ServiceName       string                 `protobuf:"bytes,3,opt,name=service_name,json=serviceName,proto3" json:"service_name,omitempty"`
+	PubkeyAlgorithm   string                 `protobuf:"bytes,4,opt,name=pubkey_algorithm,json=pubkeyAlgorithm,proto3" json:"pubkey_algorithm,omitempty"`
 	SessionId         []byte                 `protobuf:"bytes,5,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
 	unknownFields     protoimpl.UnknownFields
 	sizeCache         protoimpl.SizeCache
@@ -537,7 +592,6 @@ func (x *SshAuthContext) GetSessionId() []byte {
 	return nil
 }
 
-// 1. Relay -> Server: Fetch cached public keys for this user
 type GetIdentitiesRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Auth          *NodeAuth              `protobuf:"bytes,1,opt,name=auth,proto3" json:"auth,omitempty"`
@@ -626,19 +680,18 @@ func (x *GetIdentitiesResponse) GetKeys() []*PublicKey {
 	return nil
 }
 
-// 2. Relay -> Server -> Client: Request cryptographic signature
 type SignRequest struct {
 	state           protoimpl.MessageState `protogen:"open.v1"`
 	RequestId       string                 `protobuf:"bytes,1,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
 	TimestampUnixMs uint64                 `protobuf:"varint,2,opt,name=timestamp_unix_ms,json=timestampUnixMs,proto3" json:"timestamp_unix_ms,omitempty"`
 	KeyBlob         []byte                 `protobuf:"bytes,3,opt,name=key_blob,json=keyBlob,proto3" json:"key_blob,omitempty"`
-	Data            []byte                 `protobuf:"bytes,4,opt,name=data,proto3" json:"data,omitempty"`    // Raw SSH challenge payload to sign
-	Flags           uint32                 `protobuf:"varint,5,opt,name=flags,proto3" json:"flags,omitempty"` // SSH_AGENT_RSA_SHA2_256 (2), SSH_AGENT_RSA_SHA2_512 (4)
+	Data            []byte                 `protobuf:"bytes,4,opt,name=data,proto3" json:"data,omitempty"`
+	Flags           uint32                 `protobuf:"varint,5,opt,name=flags,proto3" json:"flags,omitempty"`
 	ProcessContext  *ProcessContext        `protobuf:"bytes,6,opt,name=process_context,json=processContext,proto3" json:"process_context,omitempty"`
 	SshAuthContext  *SshAuthContext        `protobuf:"bytes,7,opt,name=ssh_auth_context,json=sshAuthContext,proto3" json:"ssh_auth_context,omitempty"`
-	RelayGrant      *NodeGrant             `protobuf:"bytes,8,opt,name=relay_grant,json=relayGrant,proto3" json:"relay_grant,omitempty"`             // Verified end-to-end by sockcast-client
-	RelaySignature  []byte                 `protobuf:"bytes,9,opt,name=relay_signature,json=relaySignature,proto3" json:"relay_signature,omitempty"` // Ed25519 signature by relay's node_privkey over fields 1..8
-	Auth            *NodeAuth              `protobuf:"bytes,10,opt,name=auth,proto3" json:"auth,omitempty"`                                          // RPC caller authentication verified by sockcast-server
+	RelayGrant      *NodeGrant             `protobuf:"bytes,8,opt,name=relay_grant,json=relayGrant,proto3" json:"relay_grant,omitempty"`
+	RelaySignature  []byte                 `protobuf:"bytes,9,opt,name=relay_signature,json=relaySignature,proto3" json:"relay_signature,omitempty"`
+	Auth            *NodeAuth              `protobuf:"bytes,10,opt,name=auth,proto3" json:"auth,omitempty"`
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
@@ -747,7 +800,7 @@ type SignResponse struct {
 	state           protoimpl.MessageState `protogen:"open.v1"`
 	RequestId       string                 `protobuf:"bytes,1,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
 	Approved        bool                   `protobuf:"varint,2,opt,name=approved,proto3" json:"approved,omitempty"`
-	SignatureBlob   []byte                 `protobuf:"bytes,3,opt,name=signature_blob,json=signatureBlob,proto3" json:"signature_blob,omitempty"` // Raw SSH wire format signature
+	SignatureBlob   []byte                 `protobuf:"bytes,3,opt,name=signature_blob,json=signatureBlob,proto3" json:"signature_blob,omitempty"`
 	ErrorMessage    string                 `protobuf:"bytes,4,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
 	HandledByNodeId string                 `protobuf:"bytes,5,opt,name=handled_by_node_id,json=handledByNodeId,proto3" json:"handled_by_node_id,omitempty"`
 	unknownFields   protoimpl.UnknownFields
@@ -819,13 +872,12 @@ func (x *SignResponse) GetHandledByNodeId() string {
 	return ""
 }
 
-// 3. Bidirectional Stream: Client <-> Server
 type WorkstationStatus struct {
 	state            protoimpl.MessageState `protogen:"open.v1"`
 	LastInputEpochMs uint64                 `protobuf:"varint,1,opt,name=last_input_epoch_ms,json=lastInputEpochMs,proto3" json:"last_input_epoch_ms,omitempty"`
 	ForceActive      bool                   `protobuf:"varint,2,opt,name=force_active,json=forceActive,proto3" json:"force_active,omitempty"`
-	Os               string                 `protobuf:"bytes,3,opt,name=os,proto3" json:"os,omitempty"`     // "macos", "windows", "linux"
-	Keys             []*PublicKey           `protobuf:"bytes,4,rep,name=keys,proto3" json:"keys,omitempty"` // Filtered local public keys
+	Os               string                 `protobuf:"bytes,3,opt,name=os,proto3" json:"os,omitempty"`
+	Keys             []*PublicKey           `protobuf:"bytes,4,rep,name=keys,proto3" json:"keys,omitempty"`
 	unknownFields    protoimpl.UnknownFields
 	sizeCache        protoimpl.SizeCache
 }
@@ -888,7 +940,6 @@ func (x *WorkstationStatus) GetKeys() []*PublicKey {
 	return nil
 }
 
-// Immediate automated receipt sent by sockcast-client within <1.5s of receiving SignRequest
 type SignAck struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	RequestId     string                 `protobuf:"bytes,1,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
@@ -936,7 +987,7 @@ func (x *SignAck) GetRequestId() string {
 type CancelSignRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	RequestId     string                 `protobuf:"bytes,1,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
-	Reason        string                 `protobuf:"bytes,2,opt,name=reason,proto3" json:"reason,omitempty"` // e.g. "Handled by another workstation" or "Relay timed out"
+	Reason        string                 `protobuf:"bytes,2,opt,name=reason,proto3" json:"reason,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -985,6 +1036,474 @@ func (x *CancelSignRequest) GetReason() string {
 	return ""
 }
 
+type ZellijSessionInfo struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	CreatedInfo   string                 `protobuf:"bytes,2,opt,name=created_info,json=createdInfo,proto3" json:"created_info,omitempty"`
+	Exited        bool                   `protobuf:"varint,3,opt,name=exited,proto3" json:"exited,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ZellijSessionInfo) Reset() {
+	*x = ZellijSessionInfo{}
+	mi := &file_sockcast_v1_sockcast_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ZellijSessionInfo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ZellijSessionInfo) ProtoMessage() {}
+
+func (x *ZellijSessionInfo) ProtoReflect() protoreflect.Message {
+	mi := &file_sockcast_v1_sockcast_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ZellijSessionInfo.ProtoReflect.Descriptor instead.
+func (*ZellijSessionInfo) Descriptor() ([]byte, []int) {
+	return file_sockcast_v1_sockcast_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *ZellijSessionInfo) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *ZellijSessionInfo) GetCreatedInfo() string {
+	if x != nil {
+		return x.CreatedInfo
+	}
+	return ""
+}
+
+func (x *ZellijSessionInfo) GetExited() bool {
+	if x != nil {
+		return x.Exited
+	}
+	return false
+}
+
+type RelayZellijStatus struct {
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	NodeId          string                 `protobuf:"bytes,1,opt,name=node_id,json=nodeId,proto3" json:"node_id,omitempty"`
+	ZellijEnabled   bool                   `protobuf:"varint,2,opt,name=zellij_enabled,json=zellijEnabled,proto3" json:"zellij_enabled,omitempty"`
+	Sessions        []*ZellijSessionInfo   `protobuf:"bytes,3,rep,name=sessions,proto3" json:"sessions,omitempty"`
+	UpdatedAtUnixMs uint64                 `protobuf:"varint,4,opt,name=updated_at_unix_ms,json=updatedAtUnixMs,proto3" json:"updated_at_unix_ms,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *RelayZellijStatus) Reset() {
+	*x = RelayZellijStatus{}
+	mi := &file_sockcast_v1_sockcast_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RelayZellijStatus) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RelayZellijStatus) ProtoMessage() {}
+
+func (x *RelayZellijStatus) ProtoReflect() protoreflect.Message {
+	mi := &file_sockcast_v1_sockcast_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RelayZellijStatus.ProtoReflect.Descriptor instead.
+func (*RelayZellijStatus) Descriptor() ([]byte, []int) {
+	return file_sockcast_v1_sockcast_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *RelayZellijStatus) GetNodeId() string {
+	if x != nil {
+		return x.NodeId
+	}
+	return ""
+}
+
+func (x *RelayZellijStatus) GetZellijEnabled() bool {
+	if x != nil {
+		return x.ZellijEnabled
+	}
+	return false
+}
+
+func (x *RelayZellijStatus) GetSessions() []*ZellijSessionInfo {
+	if x != nil {
+		return x.Sessions
+	}
+	return nil
+}
+
+func (x *RelayZellijStatus) GetUpdatedAtUnixMs() uint64 {
+	if x != nil {
+		return x.UpdatedAtUnixMs
+	}
+	return 0
+}
+
+type ZellijHostList struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Hosts         []*RelayZellijStatus   `protobuf:"bytes,1,rep,name=hosts,proto3" json:"hosts,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ZellijHostList) Reset() {
+	*x = ZellijHostList{}
+	mi := &file_sockcast_v1_sockcast_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ZellijHostList) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ZellijHostList) ProtoMessage() {}
+
+func (x *ZellijHostList) ProtoReflect() protoreflect.Message {
+	mi := &file_sockcast_v1_sockcast_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ZellijHostList.ProtoReflect.Descriptor instead.
+func (*ZellijHostList) Descriptor() ([]byte, []int) {
+	return file_sockcast_v1_sockcast_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *ZellijHostList) GetHosts() []*RelayZellijStatus {
+	if x != nil {
+		return x.Hosts
+	}
+	return nil
+}
+
+type ZellijTunnelFrame struct {
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	TunnelId        string                 `protobuf:"bytes,1,opt,name=tunnel_id,json=tunnelId,proto3" json:"tunnel_id,omitempty"`
+	RelayNodeId     string                 `protobuf:"bytes,2,opt,name=relay_node_id,json=relayNodeId,proto3" json:"relay_node_id,omitempty"`
+	ClientNodeId    string                 `protobuf:"bytes,3,opt,name=client_node_id,json=clientNodeId,proto3" json:"client_node_id,omitempty"`
+	FrameType       ZellijFrameType        `protobuf:"varint,4,opt,name=frame_type,json=frameType,proto3,enum=sockcast.v1.ZellijFrameType" json:"frame_type,omitempty"`
+	Payload         []byte                 `protobuf:"bytes,5,opt,name=payload,proto3" json:"payload,omitempty"`
+	ErrorMessage    string                 `protobuf:"bytes,6,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
+	SenderGrant     *NodeGrant             `protobuf:"bytes,7,opt,name=sender_grant,json=senderGrant,proto3" json:"sender_grant,omitempty"`
+	SenderSignature []byte                 `protobuf:"bytes,8,opt,name=sender_signature,json=senderSignature,proto3" json:"sender_signature,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *ZellijTunnelFrame) Reset() {
+	*x = ZellijTunnelFrame{}
+	mi := &file_sockcast_v1_sockcast_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ZellijTunnelFrame) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ZellijTunnelFrame) ProtoMessage() {}
+
+func (x *ZellijTunnelFrame) ProtoReflect() protoreflect.Message {
+	mi := &file_sockcast_v1_sockcast_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ZellijTunnelFrame.ProtoReflect.Descriptor instead.
+func (*ZellijTunnelFrame) Descriptor() ([]byte, []int) {
+	return file_sockcast_v1_sockcast_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *ZellijTunnelFrame) GetTunnelId() string {
+	if x != nil {
+		return x.TunnelId
+	}
+	return ""
+}
+
+func (x *ZellijTunnelFrame) GetRelayNodeId() string {
+	if x != nil {
+		return x.RelayNodeId
+	}
+	return ""
+}
+
+func (x *ZellijTunnelFrame) GetClientNodeId() string {
+	if x != nil {
+		return x.ClientNodeId
+	}
+	return ""
+}
+
+func (x *ZellijTunnelFrame) GetFrameType() ZellijFrameType {
+	if x != nil {
+		return x.FrameType
+	}
+	return ZellijFrameType_ZELLIJ_FRAME_TYPE_UNSPECIFIED
+}
+
+func (x *ZellijTunnelFrame) GetPayload() []byte {
+	if x != nil {
+		return x.Payload
+	}
+	return nil
+}
+
+func (x *ZellijTunnelFrame) GetErrorMessage() string {
+	if x != nil {
+		return x.ErrorMessage
+	}
+	return ""
+}
+
+func (x *ZellijTunnelFrame) GetSenderGrant() *NodeGrant {
+	if x != nil {
+		return x.SenderGrant
+	}
+	return nil
+}
+
+func (x *ZellijTunnelFrame) GetSenderSignature() []byte {
+	if x != nil {
+		return x.SenderSignature
+	}
+	return nil
+}
+
+type RelayStreamMessage struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Types that are valid to be assigned to Payload:
+	//
+	//	*RelayStreamMessage_AuthHandshake
+	//	*RelayStreamMessage_ZellijStatus
+	//	*RelayStreamMessage_ZellijFrame
+	Payload       isRelayStreamMessage_Payload `protobuf_oneof:"payload"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RelayStreamMessage) Reset() {
+	*x = RelayStreamMessage{}
+	mi := &file_sockcast_v1_sockcast_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RelayStreamMessage) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RelayStreamMessage) ProtoMessage() {}
+
+func (x *RelayStreamMessage) ProtoReflect() protoreflect.Message {
+	mi := &file_sockcast_v1_sockcast_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RelayStreamMessage.ProtoReflect.Descriptor instead.
+func (*RelayStreamMessage) Descriptor() ([]byte, []int) {
+	return file_sockcast_v1_sockcast_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *RelayStreamMessage) GetPayload() isRelayStreamMessage_Payload {
+	if x != nil {
+		return x.Payload
+	}
+	return nil
+}
+
+func (x *RelayStreamMessage) GetAuthHandshake() *NodeAuth {
+	if x != nil {
+		if x, ok := x.Payload.(*RelayStreamMessage_AuthHandshake); ok {
+			return x.AuthHandshake
+		}
+	}
+	return nil
+}
+
+func (x *RelayStreamMessage) GetZellijStatus() *RelayZellijStatus {
+	if x != nil {
+		if x, ok := x.Payload.(*RelayStreamMessage_ZellijStatus); ok {
+			return x.ZellijStatus
+		}
+	}
+	return nil
+}
+
+func (x *RelayStreamMessage) GetZellijFrame() *ZellijTunnelFrame {
+	if x != nil {
+		if x, ok := x.Payload.(*RelayStreamMessage_ZellijFrame); ok {
+			return x.ZellijFrame
+		}
+	}
+	return nil
+}
+
+type isRelayStreamMessage_Payload interface {
+	isRelayStreamMessage_Payload()
+}
+
+type RelayStreamMessage_AuthHandshake struct {
+	AuthHandshake *NodeAuth `protobuf:"bytes,1,opt,name=auth_handshake,json=authHandshake,proto3,oneof"`
+}
+
+type RelayStreamMessage_ZellijStatus struct {
+	ZellijStatus *RelayZellijStatus `protobuf:"bytes,2,opt,name=zellij_status,json=zellijStatus,proto3,oneof"`
+}
+
+type RelayStreamMessage_ZellijFrame struct {
+	ZellijFrame *ZellijTunnelFrame `protobuf:"bytes,3,opt,name=zellij_frame,json=zellijFrame,proto3,oneof"`
+}
+
+func (*RelayStreamMessage_AuthHandshake) isRelayStreamMessage_Payload() {}
+
+func (*RelayStreamMessage_ZellijStatus) isRelayStreamMessage_Payload() {}
+
+func (*RelayStreamMessage_ZellijFrame) isRelayStreamMessage_Payload() {}
+
+type ServerToRelayMessage struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Types that are valid to be assigned to Payload:
+	//
+	//	*ServerToRelayMessage_ServerHeartbeatEpochMs
+	//	*ServerToRelayMessage_RefreshSessions
+	//	*ServerToRelayMessage_ZellijFrame
+	Payload       isServerToRelayMessage_Payload `protobuf_oneof:"payload"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ServerToRelayMessage) Reset() {
+	*x = ServerToRelayMessage{}
+	mi := &file_sockcast_v1_sockcast_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ServerToRelayMessage) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ServerToRelayMessage) ProtoMessage() {}
+
+func (x *ServerToRelayMessage) ProtoReflect() protoreflect.Message {
+	mi := &file_sockcast_v1_sockcast_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ServerToRelayMessage.ProtoReflect.Descriptor instead.
+func (*ServerToRelayMessage) Descriptor() ([]byte, []int) {
+	return file_sockcast_v1_sockcast_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *ServerToRelayMessage) GetPayload() isServerToRelayMessage_Payload {
+	if x != nil {
+		return x.Payload
+	}
+	return nil
+}
+
+func (x *ServerToRelayMessage) GetServerHeartbeatEpochMs() uint64 {
+	if x != nil {
+		if x, ok := x.Payload.(*ServerToRelayMessage_ServerHeartbeatEpochMs); ok {
+			return x.ServerHeartbeatEpochMs
+		}
+	}
+	return 0
+}
+
+func (x *ServerToRelayMessage) GetRefreshSessions() bool {
+	if x != nil {
+		if x, ok := x.Payload.(*ServerToRelayMessage_RefreshSessions); ok {
+			return x.RefreshSessions
+		}
+	}
+	return false
+}
+
+func (x *ServerToRelayMessage) GetZellijFrame() *ZellijTunnelFrame {
+	if x != nil {
+		if x, ok := x.Payload.(*ServerToRelayMessage_ZellijFrame); ok {
+			return x.ZellijFrame
+		}
+	}
+	return nil
+}
+
+type isServerToRelayMessage_Payload interface {
+	isServerToRelayMessage_Payload()
+}
+
+type ServerToRelayMessage_ServerHeartbeatEpochMs struct {
+	ServerHeartbeatEpochMs uint64 `protobuf:"varint,1,opt,name=server_heartbeat_epoch_ms,json=serverHeartbeatEpochMs,proto3,oneof"`
+}
+
+type ServerToRelayMessage_RefreshSessions struct {
+	RefreshSessions bool `protobuf:"varint,2,opt,name=refresh_sessions,json=refreshSessions,proto3,oneof"`
+}
+
+type ServerToRelayMessage_ZellijFrame struct {
+	ZellijFrame *ZellijTunnelFrame `protobuf:"bytes,3,opt,name=zellij_frame,json=zellijFrame,proto3,oneof"`
+}
+
+func (*ServerToRelayMessage_ServerHeartbeatEpochMs) isServerToRelayMessage_Payload() {}
+
+func (*ServerToRelayMessage_RefreshSessions) isServerToRelayMessage_Payload() {}
+
+func (*ServerToRelayMessage_ZellijFrame) isServerToRelayMessage_Payload() {}
+
 type ClientStreamMessage struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Types that are valid to be assigned to Payload:
@@ -993,6 +1512,8 @@ type ClientStreamMessage struct {
 	//	*ClientStreamMessage_Status
 	//	*ClientStreamMessage_SignAck
 	//	*ClientStreamMessage_SignResponse
+	//	*ClientStreamMessage_RequestZellijHosts
+	//	*ClientStreamMessage_ZellijFrame
 	Payload       isClientStreamMessage_Payload `protobuf_oneof:"payload"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -1000,7 +1521,7 @@ type ClientStreamMessage struct {
 
 func (x *ClientStreamMessage) Reset() {
 	*x = ClientStreamMessage{}
-	mi := &file_sockcast_v1_sockcast_proto_msgTypes[13]
+	mi := &file_sockcast_v1_sockcast_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1012,7 +1533,7 @@ func (x *ClientStreamMessage) String() string {
 func (*ClientStreamMessage) ProtoMessage() {}
 
 func (x *ClientStreamMessage) ProtoReflect() protoreflect.Message {
-	mi := &file_sockcast_v1_sockcast_proto_msgTypes[13]
+	mi := &file_sockcast_v1_sockcast_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1025,7 +1546,7 @@ func (x *ClientStreamMessage) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ClientStreamMessage.ProtoReflect.Descriptor instead.
 func (*ClientStreamMessage) Descriptor() ([]byte, []int) {
-	return file_sockcast_v1_sockcast_proto_rawDescGZIP(), []int{13}
+	return file_sockcast_v1_sockcast_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *ClientStreamMessage) GetPayload() isClientStreamMessage_Payload {
@@ -1071,24 +1592,50 @@ func (x *ClientStreamMessage) GetSignResponse() *SignResponse {
 	return nil
 }
 
+func (x *ClientStreamMessage) GetRequestZellijHosts() bool {
+	if x != nil {
+		if x, ok := x.Payload.(*ClientStreamMessage_RequestZellijHosts); ok {
+			return x.RequestZellijHosts
+		}
+	}
+	return false
+}
+
+func (x *ClientStreamMessage) GetZellijFrame() *ZellijTunnelFrame {
+	if x != nil {
+		if x, ok := x.Payload.(*ClientStreamMessage_ZellijFrame); ok {
+			return x.ZellijFrame
+		}
+	}
+	return nil
+}
+
 type isClientStreamMessage_Payload interface {
 	isClientStreamMessage_Payload()
 }
 
 type ClientStreamMessage_AuthHandshake struct {
-	AuthHandshake *NodeAuth `protobuf:"bytes,1,opt,name=auth_handshake,json=authHandshake,proto3,oneof"` // Sent as first message on stream open
+	AuthHandshake *NodeAuth `protobuf:"bytes,1,opt,name=auth_handshake,json=authHandshake,proto3,oneof"`
 }
 
 type ClientStreamMessage_Status struct {
-	Status *WorkstationStatus `protobuf:"bytes,2,opt,name=status,proto3,oneof"` // Sent every 25s and on activity/key changes
+	Status *WorkstationStatus `protobuf:"bytes,2,opt,name=status,proto3,oneof"`
 }
 
 type ClientStreamMessage_SignAck struct {
-	SignAck *SignAck `protobuf:"bytes,3,opt,name=sign_ack,json=signAck,proto3,oneof"` // Sent immediately when SignRequest arrives
+	SignAck *SignAck `protobuf:"bytes,3,opt,name=sign_ack,json=signAck,proto3,oneof"`
 }
 
 type ClientStreamMessage_SignResponse struct {
-	SignResponse *SignResponse `protobuf:"bytes,4,opt,name=sign_response,json=signResponse,proto3,oneof"` // Sent after policy auto-approve or user UI decision
+	SignResponse *SignResponse `protobuf:"bytes,4,opt,name=sign_response,json=signResponse,proto3,oneof"`
+}
+
+type ClientStreamMessage_RequestZellijHosts struct {
+	RequestZellijHosts bool `protobuf:"varint,5,opt,name=request_zellij_hosts,json=requestZellijHosts,proto3,oneof"`
+}
+
+type ClientStreamMessage_ZellijFrame struct {
+	ZellijFrame *ZellijTunnelFrame `protobuf:"bytes,6,opt,name=zellij_frame,json=zellijFrame,proto3,oneof"`
 }
 
 func (*ClientStreamMessage_AuthHandshake) isClientStreamMessage_Payload() {}
@@ -1099,6 +1646,10 @@ func (*ClientStreamMessage_SignAck) isClientStreamMessage_Payload() {}
 
 func (*ClientStreamMessage_SignResponse) isClientStreamMessage_Payload() {}
 
+func (*ClientStreamMessage_RequestZellijHosts) isClientStreamMessage_Payload() {}
+
+func (*ClientStreamMessage_ZellijFrame) isClientStreamMessage_Payload() {}
+
 type ServerStreamMessage struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Types that are valid to be assigned to Payload:
@@ -1106,6 +1657,8 @@ type ServerStreamMessage struct {
 	//	*ServerStreamMessage_SignRequest
 	//	*ServerStreamMessage_CancelSignRequest
 	//	*ServerStreamMessage_ServerHeartbeatEpochMs
+	//	*ServerStreamMessage_ZellijHostList
+	//	*ServerStreamMessage_ZellijFrame
 	Payload       isServerStreamMessage_Payload `protobuf_oneof:"payload"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -1113,7 +1666,7 @@ type ServerStreamMessage struct {
 
 func (x *ServerStreamMessage) Reset() {
 	*x = ServerStreamMessage{}
-	mi := &file_sockcast_v1_sockcast_proto_msgTypes[14]
+	mi := &file_sockcast_v1_sockcast_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1125,7 +1678,7 @@ func (x *ServerStreamMessage) String() string {
 func (*ServerStreamMessage) ProtoMessage() {}
 
 func (x *ServerStreamMessage) ProtoReflect() protoreflect.Message {
-	mi := &file_sockcast_v1_sockcast_proto_msgTypes[14]
+	mi := &file_sockcast_v1_sockcast_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1138,7 +1691,7 @@ func (x *ServerStreamMessage) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ServerStreamMessage.ProtoReflect.Descriptor instead.
 func (*ServerStreamMessage) Descriptor() ([]byte, []int) {
-	return file_sockcast_v1_sockcast_proto_rawDescGZIP(), []int{14}
+	return file_sockcast_v1_sockcast_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *ServerStreamMessage) GetPayload() isServerStreamMessage_Payload {
@@ -1175,6 +1728,24 @@ func (x *ServerStreamMessage) GetServerHeartbeatEpochMs() uint64 {
 	return 0
 }
 
+func (x *ServerStreamMessage) GetZellijHostList() *ZellijHostList {
+	if x != nil {
+		if x, ok := x.Payload.(*ServerStreamMessage_ZellijHostList); ok {
+			return x.ZellijHostList
+		}
+	}
+	return nil
+}
+
+func (x *ServerStreamMessage) GetZellijFrame() *ZellijTunnelFrame {
+	if x != nil {
+		if x, ok := x.Payload.(*ServerStreamMessage_ZellijFrame); ok {
+			return x.ZellijFrame
+		}
+	}
+	return nil
+}
+
 type isServerStreamMessage_Payload interface {
 	isServerStreamMessage_Payload()
 }
@@ -1191,11 +1762,23 @@ type ServerStreamMessage_ServerHeartbeatEpochMs struct {
 	ServerHeartbeatEpochMs uint64 `protobuf:"varint,3,opt,name=server_heartbeat_epoch_ms,json=serverHeartbeatEpochMs,proto3,oneof"`
 }
 
+type ServerStreamMessage_ZellijHostList struct {
+	ZellijHostList *ZellijHostList `protobuf:"bytes,4,opt,name=zellij_host_list,json=zellijHostList,proto3,oneof"`
+}
+
+type ServerStreamMessage_ZellijFrame struct {
+	ZellijFrame *ZellijTunnelFrame `protobuf:"bytes,5,opt,name=zellij_frame,json=zellijFrame,proto3,oneof"`
+}
+
 func (*ServerStreamMessage_SignRequest) isServerStreamMessage_Payload() {}
 
 func (*ServerStreamMessage_CancelSignRequest) isServerStreamMessage_Payload() {}
 
 func (*ServerStreamMessage_ServerHeartbeatEpochMs) isServerStreamMessage_Payload() {}
+
+func (*ServerStreamMessage_ZellijHostList) isServerStreamMessage_Payload() {}
+
+func (*ServerStreamMessage_ZellijFrame) isServerStreamMessage_Payload() {}
 
 var File_sockcast_v1_sockcast_proto protoreflect.FileDescriptor
 
@@ -1278,26 +1861,69 @@ const file_sockcast_v1_sockcast_proto_rawDesc = "" +
 	"\x11CancelSignRequest\x12\x1d\n" +
 	"\n" +
 	"request_id\x18\x01 \x01(\tR\trequestId\x12\x16\n" +
-	"\x06reason\x18\x02 \x01(\tR\x06reason\"\x8f\x02\n" +
+	"\x06reason\x18\x02 \x01(\tR\x06reason\"b\n" +
+	"\x11ZellijSessionInfo\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12!\n" +
+	"\fcreated_info\x18\x02 \x01(\tR\vcreatedInfo\x12\x16\n" +
+	"\x06exited\x18\x03 \x01(\bR\x06exited\"\xbc\x01\n" +
+	"\x11RelayZellijStatus\x12\x17\n" +
+	"\anode_id\x18\x01 \x01(\tR\x06nodeId\x12%\n" +
+	"\x0ezellij_enabled\x18\x02 \x01(\bR\rzellijEnabled\x12:\n" +
+	"\bsessions\x18\x03 \x03(\v2\x1e.sockcast.v1.ZellijSessionInfoR\bsessions\x12+\n" +
+	"\x12updated_at_unix_ms\x18\x04 \x01(\x04R\x0fupdatedAtUnixMs\"F\n" +
+	"\x0eZellijHostList\x124\n" +
+	"\x05hosts\x18\x01 \x03(\v2\x1e.sockcast.v1.RelayZellijStatusR\x05hosts\"\xdc\x02\n" +
+	"\x11ZellijTunnelFrame\x12\x1b\n" +
+	"\ttunnel_id\x18\x01 \x01(\tR\btunnelId\x12\"\n" +
+	"\rrelay_node_id\x18\x02 \x01(\tR\vrelayNodeId\x12$\n" +
+	"\x0eclient_node_id\x18\x03 \x01(\tR\fclientNodeId\x12;\n" +
+	"\n" +
+	"frame_type\x18\x04 \x01(\x0e2\x1c.sockcast.v1.ZellijFrameTypeR\tframeType\x12\x18\n" +
+	"\apayload\x18\x05 \x01(\fR\apayload\x12#\n" +
+	"\rerror_message\x18\x06 \x01(\tR\ferrorMessage\x129\n" +
+	"\fsender_grant\x18\a \x01(\v2\x16.sockcast.v1.NodeGrantR\vsenderGrant\x12)\n" +
+	"\x10sender_signature\x18\b \x01(\fR\x0fsenderSignature\"\xeb\x01\n" +
+	"\x12RelayStreamMessage\x12>\n" +
+	"\x0eauth_handshake\x18\x01 \x01(\v2\x15.sockcast.v1.NodeAuthH\x00R\rauthHandshake\x12E\n" +
+	"\rzellij_status\x18\x02 \x01(\v2\x1e.sockcast.v1.RelayZellijStatusH\x00R\fzellijStatus\x12C\n" +
+	"\fzellij_frame\x18\x03 \x01(\v2\x1e.sockcast.v1.ZellijTunnelFrameH\x00R\vzellijFrameB\t\n" +
+	"\apayload\"\xd0\x01\n" +
+	"\x14ServerToRelayMessage\x12;\n" +
+	"\x19server_heartbeat_epoch_ms\x18\x01 \x01(\x04H\x00R\x16serverHeartbeatEpochMs\x12+\n" +
+	"\x10refresh_sessions\x18\x02 \x01(\bH\x00R\x0frefreshSessions\x12C\n" +
+	"\fzellij_frame\x18\x03 \x01(\v2\x1e.sockcast.v1.ZellijTunnelFrameH\x00R\vzellijFrameB\t\n" +
+	"\apayload\"\x88\x03\n" +
 	"\x13ClientStreamMessage\x12>\n" +
 	"\x0eauth_handshake\x18\x01 \x01(\v2\x15.sockcast.v1.NodeAuthH\x00R\rauthHandshake\x128\n" +
 	"\x06status\x18\x02 \x01(\v2\x1e.sockcast.v1.WorkstationStatusH\x00R\x06status\x121\n" +
 	"\bsign_ack\x18\x03 \x01(\v2\x14.sockcast.v1.SignAckH\x00R\asignAck\x12@\n" +
-	"\rsign_response\x18\x04 \x01(\v2\x19.sockcast.v1.SignResponseH\x00R\fsignResponseB\t\n" +
-	"\apayload\"\xee\x01\n" +
+	"\rsign_response\x18\x04 \x01(\v2\x19.sockcast.v1.SignResponseH\x00R\fsignResponse\x122\n" +
+	"\x14request_zellij_hosts\x18\x05 \x01(\bH\x00R\x12requestZellijHosts\x12C\n" +
+	"\fzellij_frame\x18\x06 \x01(\v2\x1e.sockcast.v1.ZellijTunnelFrameH\x00R\vzellijFrameB\t\n" +
+	"\apayload\"\xfc\x02\n" +
 	"\x13ServerStreamMessage\x12=\n" +
 	"\fsign_request\x18\x01 \x01(\v2\x18.sockcast.v1.SignRequestH\x00R\vsignRequest\x12P\n" +
 	"\x13cancel_sign_request\x18\x02 \x01(\v2\x1e.sockcast.v1.CancelSignRequestH\x00R\x11cancelSignRequest\x12;\n" +
-	"\x19server_heartbeat_epoch_ms\x18\x03 \x01(\x04H\x00R\x16serverHeartbeatEpochMsB\t\n" +
+	"\x19server_heartbeat_epoch_ms\x18\x03 \x01(\x04H\x00R\x16serverHeartbeatEpochMs\x12G\n" +
+	"\x10zellij_host_list\x18\x04 \x01(\v2\x1b.sockcast.v1.ZellijHostListH\x00R\x0ezellijHostList\x12C\n" +
+	"\fzellij_frame\x18\x05 \x01(\v2\x1e.sockcast.v1.ZellijTunnelFrameH\x00R\vzellijFrameB\t\n" +
 	"\apayload*P\n" +
 	"\bNodeRole\x12\x19\n" +
 	"\x15NODE_ROLE_UNSPECIFIED\x10\x00\x12\x13\n" +
 	"\x0fNODE_ROLE_RELAY\x10\x01\x12\x14\n" +
-	"\x10NODE_ROLE_CLIENT\x10\x022\x84\x02\n" +
+	"\x10NODE_ROLE_CLIENT\x10\x02*\xcc\x01\n" +
+	"\x0fZellijFrameType\x12!\n" +
+	"\x1dZELLIJ_FRAME_TYPE_UNSPECIFIED\x10\x00\x12\x1a\n" +
+	"\x16ZELLIJ_FRAME_TYPE_OPEN\x10\x01\x12\x1a\n" +
+	"\x16ZELLIJ_FRAME_TYPE_DATA\x10\x02\x12\x1b\n" +
+	"\x17ZELLIJ_FRAME_TYPE_CLOSE\x10\x03\x12\x1f\n" +
+	"\x1bZELLIJ_FRAME_TYPE_P2P_OFFER\x10\x04\x12 \n" +
+	"\x1cZELLIJ_FRAME_TYPE_P2P_ANSWER\x10\x052\xdc\x02\n" +
 	"\x0fSockcastService\x12V\n" +
 	"\rGetIdentities\x12!.sockcast.v1.GetIdentitiesRequest\x1a\".sockcast.v1.GetIdentitiesResponse\x12;\n" +
 	"\x04Sign\x12\x18.sockcast.v1.SignRequest\x1a\x19.sockcast.v1.SignResponse\x12\\\n" +
-	"\x12ConnectWorkstation\x12 .sockcast.v1.ClientStreamMessage\x1a .sockcast.v1.ServerStreamMessage(\x010\x01BCZAgithub.com/theraphim/sockcast-proto/gen/go/sockcast/v1;sockcastv1b\x06proto3"
+	"\x12ConnectWorkstation\x12 .sockcast.v1.ClientStreamMessage\x1a .sockcast.v1.ServerStreamMessage(\x010\x01\x12V\n" +
+	"\fConnectRelay\x12\x1f.sockcast.v1.RelayStreamMessage\x1a!.sockcast.v1.ServerToRelayMessage(\x010\x01BCZAgithub.com/theraphim/sockcast-proto/gen/go/sockcast/v1;sockcastv1b\x06proto3"
 
 var (
 	file_sockcast_v1_sockcast_proto_rawDescOnce sync.Once
@@ -1311,54 +1937,74 @@ func file_sockcast_v1_sockcast_proto_rawDescGZIP() []byte {
 	return file_sockcast_v1_sockcast_proto_rawDescData
 }
 
-var file_sockcast_v1_sockcast_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_sockcast_v1_sockcast_proto_msgTypes = make([]protoimpl.MessageInfo, 15)
+var file_sockcast_v1_sockcast_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
+var file_sockcast_v1_sockcast_proto_msgTypes = make([]protoimpl.MessageInfo, 21)
 var file_sockcast_v1_sockcast_proto_goTypes = []any{
 	(NodeRole)(0),                 // 0: sockcast.v1.NodeRole
-	(*NodeGrant)(nil),             // 1: sockcast.v1.NodeGrant
-	(*NodeAuth)(nil),              // 2: sockcast.v1.NodeAuth
-	(*PublicKey)(nil),             // 3: sockcast.v1.PublicKey
-	(*ProcessAncestor)(nil),       // 4: sockcast.v1.ProcessAncestor
-	(*ProcessContext)(nil),        // 5: sockcast.v1.ProcessContext
-	(*SshAuthContext)(nil),        // 6: sockcast.v1.SshAuthContext
-	(*GetIdentitiesRequest)(nil),  // 7: sockcast.v1.GetIdentitiesRequest
-	(*GetIdentitiesResponse)(nil), // 8: sockcast.v1.GetIdentitiesResponse
-	(*SignRequest)(nil),           // 9: sockcast.v1.SignRequest
-	(*SignResponse)(nil),          // 10: sockcast.v1.SignResponse
-	(*WorkstationStatus)(nil),     // 11: sockcast.v1.WorkstationStatus
-	(*SignAck)(nil),               // 12: sockcast.v1.SignAck
-	(*CancelSignRequest)(nil),     // 13: sockcast.v1.CancelSignRequest
-	(*ClientStreamMessage)(nil),   // 14: sockcast.v1.ClientStreamMessage
-	(*ServerStreamMessage)(nil),   // 15: sockcast.v1.ServerStreamMessage
+	(ZellijFrameType)(0),          // 1: sockcast.v1.ZellijFrameType
+	(*NodeGrant)(nil),             // 2: sockcast.v1.NodeGrant
+	(*NodeAuth)(nil),              // 3: sockcast.v1.NodeAuth
+	(*PublicKey)(nil),             // 4: sockcast.v1.PublicKey
+	(*ProcessAncestor)(nil),       // 5: sockcast.v1.ProcessAncestor
+	(*ProcessContext)(nil),        // 6: sockcast.v1.ProcessContext
+	(*SshAuthContext)(nil),        // 7: sockcast.v1.SshAuthContext
+	(*GetIdentitiesRequest)(nil),  // 8: sockcast.v1.GetIdentitiesRequest
+	(*GetIdentitiesResponse)(nil), // 9: sockcast.v1.GetIdentitiesResponse
+	(*SignRequest)(nil),           // 10: sockcast.v1.SignRequest
+	(*SignResponse)(nil),          // 11: sockcast.v1.SignResponse
+	(*WorkstationStatus)(nil),     // 12: sockcast.v1.WorkstationStatus
+	(*SignAck)(nil),               // 13: sockcast.v1.SignAck
+	(*CancelSignRequest)(nil),     // 14: sockcast.v1.CancelSignRequest
+	(*ZellijSessionInfo)(nil),     // 15: sockcast.v1.ZellijSessionInfo
+	(*RelayZellijStatus)(nil),     // 16: sockcast.v1.RelayZellijStatus
+	(*ZellijHostList)(nil),        // 17: sockcast.v1.ZellijHostList
+	(*ZellijTunnelFrame)(nil),     // 18: sockcast.v1.ZellijTunnelFrame
+	(*RelayStreamMessage)(nil),    // 19: sockcast.v1.RelayStreamMessage
+	(*ServerToRelayMessage)(nil),  // 20: sockcast.v1.ServerToRelayMessage
+	(*ClientStreamMessage)(nil),   // 21: sockcast.v1.ClientStreamMessage
+	(*ServerStreamMessage)(nil),   // 22: sockcast.v1.ServerStreamMessage
 }
 var file_sockcast_v1_sockcast_proto_depIdxs = []int32{
 	0,  // 0: sockcast.v1.NodeGrant.role:type_name -> sockcast.v1.NodeRole
-	1,  // 1: sockcast.v1.NodeAuth.grant:type_name -> sockcast.v1.NodeGrant
-	4,  // 2: sockcast.v1.ProcessContext.ancestors:type_name -> sockcast.v1.ProcessAncestor
-	2,  // 3: sockcast.v1.GetIdentitiesRequest.auth:type_name -> sockcast.v1.NodeAuth
-	3,  // 4: sockcast.v1.GetIdentitiesResponse.keys:type_name -> sockcast.v1.PublicKey
-	5,  // 5: sockcast.v1.SignRequest.process_context:type_name -> sockcast.v1.ProcessContext
-	6,  // 6: sockcast.v1.SignRequest.ssh_auth_context:type_name -> sockcast.v1.SshAuthContext
-	1,  // 7: sockcast.v1.SignRequest.relay_grant:type_name -> sockcast.v1.NodeGrant
-	2,  // 8: sockcast.v1.SignRequest.auth:type_name -> sockcast.v1.NodeAuth
-	3,  // 9: sockcast.v1.WorkstationStatus.keys:type_name -> sockcast.v1.PublicKey
-	2,  // 10: sockcast.v1.ClientStreamMessage.auth_handshake:type_name -> sockcast.v1.NodeAuth
-	11, // 11: sockcast.v1.ClientStreamMessage.status:type_name -> sockcast.v1.WorkstationStatus
-	12, // 12: sockcast.v1.ClientStreamMessage.sign_ack:type_name -> sockcast.v1.SignAck
-	10, // 13: sockcast.v1.ClientStreamMessage.sign_response:type_name -> sockcast.v1.SignResponse
-	9,  // 14: sockcast.v1.ServerStreamMessage.sign_request:type_name -> sockcast.v1.SignRequest
-	13, // 15: sockcast.v1.ServerStreamMessage.cancel_sign_request:type_name -> sockcast.v1.CancelSignRequest
-	7,  // 16: sockcast.v1.SockcastService.GetIdentities:input_type -> sockcast.v1.GetIdentitiesRequest
-	9,  // 17: sockcast.v1.SockcastService.Sign:input_type -> sockcast.v1.SignRequest
-	14, // 18: sockcast.v1.SockcastService.ConnectWorkstation:input_type -> sockcast.v1.ClientStreamMessage
-	8,  // 19: sockcast.v1.SockcastService.GetIdentities:output_type -> sockcast.v1.GetIdentitiesResponse
-	10, // 20: sockcast.v1.SockcastService.Sign:output_type -> sockcast.v1.SignResponse
-	15, // 21: sockcast.v1.SockcastService.ConnectWorkstation:output_type -> sockcast.v1.ServerStreamMessage
-	19, // [19:22] is the sub-list for method output_type
-	16, // [16:19] is the sub-list for method input_type
-	16, // [16:16] is the sub-list for extension type_name
-	16, // [16:16] is the sub-list for extension extendee
-	0,  // [0:16] is the sub-list for field type_name
+	2,  // 1: sockcast.v1.NodeAuth.grant:type_name -> sockcast.v1.NodeGrant
+	5,  // 2: sockcast.v1.ProcessContext.ancestors:type_name -> sockcast.v1.ProcessAncestor
+	3,  // 3: sockcast.v1.GetIdentitiesRequest.auth:type_name -> sockcast.v1.NodeAuth
+	4,  // 4: sockcast.v1.GetIdentitiesResponse.keys:type_name -> sockcast.v1.PublicKey
+	6,  // 5: sockcast.v1.SignRequest.process_context:type_name -> sockcast.v1.ProcessContext
+	7,  // 6: sockcast.v1.SignRequest.ssh_auth_context:type_name -> sockcast.v1.SshAuthContext
+	2,  // 7: sockcast.v1.SignRequest.relay_grant:type_name -> sockcast.v1.NodeGrant
+	3,  // 8: sockcast.v1.SignRequest.auth:type_name -> sockcast.v1.NodeAuth
+	4,  // 9: sockcast.v1.WorkstationStatus.keys:type_name -> sockcast.v1.PublicKey
+	15, // 10: sockcast.v1.RelayZellijStatus.sessions:type_name -> sockcast.v1.ZellijSessionInfo
+	16, // 11: sockcast.v1.ZellijHostList.hosts:type_name -> sockcast.v1.RelayZellijStatus
+	1,  // 12: sockcast.v1.ZellijTunnelFrame.frame_type:type_name -> sockcast.v1.ZellijFrameType
+	2,  // 13: sockcast.v1.ZellijTunnelFrame.sender_grant:type_name -> sockcast.v1.NodeGrant
+	3,  // 14: sockcast.v1.RelayStreamMessage.auth_handshake:type_name -> sockcast.v1.NodeAuth
+	16, // 15: sockcast.v1.RelayStreamMessage.zellij_status:type_name -> sockcast.v1.RelayZellijStatus
+	18, // 16: sockcast.v1.RelayStreamMessage.zellij_frame:type_name -> sockcast.v1.ZellijTunnelFrame
+	18, // 17: sockcast.v1.ServerToRelayMessage.zellij_frame:type_name -> sockcast.v1.ZellijTunnelFrame
+	3,  // 18: sockcast.v1.ClientStreamMessage.auth_handshake:type_name -> sockcast.v1.NodeAuth
+	12, // 19: sockcast.v1.ClientStreamMessage.status:type_name -> sockcast.v1.WorkstationStatus
+	13, // 20: sockcast.v1.ClientStreamMessage.sign_ack:type_name -> sockcast.v1.SignAck
+	11, // 21: sockcast.v1.ClientStreamMessage.sign_response:type_name -> sockcast.v1.SignResponse
+	18, // 22: sockcast.v1.ClientStreamMessage.zellij_frame:type_name -> sockcast.v1.ZellijTunnelFrame
+	10, // 23: sockcast.v1.ServerStreamMessage.sign_request:type_name -> sockcast.v1.SignRequest
+	14, // 24: sockcast.v1.ServerStreamMessage.cancel_sign_request:type_name -> sockcast.v1.CancelSignRequest
+	17, // 25: sockcast.v1.ServerStreamMessage.zellij_host_list:type_name -> sockcast.v1.ZellijHostList
+	18, // 26: sockcast.v1.ServerStreamMessage.zellij_frame:type_name -> sockcast.v1.ZellijTunnelFrame
+	8,  // 27: sockcast.v1.SockcastService.GetIdentities:input_type -> sockcast.v1.GetIdentitiesRequest
+	10, // 28: sockcast.v1.SockcastService.Sign:input_type -> sockcast.v1.SignRequest
+	21, // 29: sockcast.v1.SockcastService.ConnectWorkstation:input_type -> sockcast.v1.ClientStreamMessage
+	19, // 30: sockcast.v1.SockcastService.ConnectRelay:input_type -> sockcast.v1.RelayStreamMessage
+	9,  // 31: sockcast.v1.SockcastService.GetIdentities:output_type -> sockcast.v1.GetIdentitiesResponse
+	11, // 32: sockcast.v1.SockcastService.Sign:output_type -> sockcast.v1.SignResponse
+	22, // 33: sockcast.v1.SockcastService.ConnectWorkstation:output_type -> sockcast.v1.ServerStreamMessage
+	20, // 34: sockcast.v1.SockcastService.ConnectRelay:output_type -> sockcast.v1.ServerToRelayMessage
+	31, // [31:35] is the sub-list for method output_type
+	27, // [27:31] is the sub-list for method input_type
+	27, // [27:27] is the sub-list for extension type_name
+	27, // [27:27] is the sub-list for extension extendee
+	0,  // [0:27] is the sub-list for field type_name
 }
 
 func init() { file_sockcast_v1_sockcast_proto_init() }
@@ -1366,24 +2012,38 @@ func file_sockcast_v1_sockcast_proto_init() {
 	if File_sockcast_v1_sockcast_proto != nil {
 		return
 	}
-	file_sockcast_v1_sockcast_proto_msgTypes[13].OneofWrappers = []any{
+	file_sockcast_v1_sockcast_proto_msgTypes[17].OneofWrappers = []any{
+		(*RelayStreamMessage_AuthHandshake)(nil),
+		(*RelayStreamMessage_ZellijStatus)(nil),
+		(*RelayStreamMessage_ZellijFrame)(nil),
+	}
+	file_sockcast_v1_sockcast_proto_msgTypes[18].OneofWrappers = []any{
+		(*ServerToRelayMessage_ServerHeartbeatEpochMs)(nil),
+		(*ServerToRelayMessage_RefreshSessions)(nil),
+		(*ServerToRelayMessage_ZellijFrame)(nil),
+	}
+	file_sockcast_v1_sockcast_proto_msgTypes[19].OneofWrappers = []any{
 		(*ClientStreamMessage_AuthHandshake)(nil),
 		(*ClientStreamMessage_Status)(nil),
 		(*ClientStreamMessage_SignAck)(nil),
 		(*ClientStreamMessage_SignResponse)(nil),
+		(*ClientStreamMessage_RequestZellijHosts)(nil),
+		(*ClientStreamMessage_ZellijFrame)(nil),
 	}
-	file_sockcast_v1_sockcast_proto_msgTypes[14].OneofWrappers = []any{
+	file_sockcast_v1_sockcast_proto_msgTypes[20].OneofWrappers = []any{
 		(*ServerStreamMessage_SignRequest)(nil),
 		(*ServerStreamMessage_CancelSignRequest)(nil),
 		(*ServerStreamMessage_ServerHeartbeatEpochMs)(nil),
+		(*ServerStreamMessage_ZellijHostList)(nil),
+		(*ServerStreamMessage_ZellijFrame)(nil),
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_sockcast_v1_sockcast_proto_rawDesc), len(file_sockcast_v1_sockcast_proto_rawDesc)),
-			NumEnums:      1,
-			NumMessages:   15,
+			NumEnums:      2,
+			NumMessages:   21,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

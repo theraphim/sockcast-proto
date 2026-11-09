@@ -110,12 +110,67 @@ message CancelSignRequest {
   string reason = 2;                // e.g. "Handled by another workstation" or "Relay timed out"
 }
 
+enum ZellijFrameType {
+  ZELLIJ_FRAME_TYPE_UNSPECIFIED = 0;
+  ZELLIJ_FRAME_TYPE_OPEN = 1;
+  ZELLIJ_FRAME_TYPE_DATA = 2;
+  ZELLIJ_FRAME_TYPE_CLOSE = 3;
+  ZELLIJ_FRAME_TYPE_P2P_OFFER = 4;
+  ZELLIJ_FRAME_TYPE_P2P_ANSWER = 5;
+}
+
+message ZellijSessionInfo {
+  string name = 1;
+  string created_info = 2;
+  bool exited = 3;
+}
+
+message RelayZellijStatus {
+  string node_id = 1;
+  bool zellij_enabled = 2;
+  repeated ZellijSessionInfo sessions = 3;
+  uint64 updated_at_unix_ms = 4;
+}
+
+message ZellijHostList {
+  repeated RelayZellijStatus hosts = 1;
+}
+
+message ZellijTunnelFrame {
+  string tunnel_id = 1;
+  string relay_node_id = 2;
+  string client_node_id = 3;
+  ZellijFrameType frame_type = 4;
+  bytes payload = 5;
+  string error_message = 6;
+  NodeGrant sender_grant = 7;
+  bytes sender_signature = 8;
+}
+
+message RelayStreamMessage {
+  oneof payload {
+    NodeAuth auth_handshake = 1;
+    RelayZellijStatus zellij_status = 2;
+    ZellijTunnelFrame zellij_frame = 3;
+  }
+}
+
+message ServerToRelayMessage {
+  oneof payload {
+    uint64 server_heartbeat_epoch_ms = 1;
+    bool refresh_sessions = 2;
+    ZellijTunnelFrame zellij_frame = 3;
+  }
+}
+
 message ClientStreamMessage {
   oneof payload {
     NodeAuth auth_handshake = 1;    // Sent as first message on stream open
     WorkstationStatus status = 2;   // Sent every 25s and on activity/key changes
     SignAck sign_ack = 3;           // Sent immediately when SignRequest arrives
     SignResponse sign_response = 4; // Sent after policy auto-approve or user UI decision
+    bool request_zellij_hosts = 5;  // Requests current ZellijHostList for this user
+    ZellijTunnelFrame zellij_frame = 6; // Tunnel frame or P2P_OFFER to relay_node_id
   }
 }
 
@@ -124,6 +179,8 @@ message ServerStreamMessage {
     SignRequest sign_request = 1;
     CancelSignRequest cancel_sign_request = 2;
     uint64 server_heartbeat_epoch_ms = 3;
+    ZellijHostList zellij_host_list = 4;
+    ZellijTunnelFrame zellij_frame = 5;
   }
 }
 
@@ -134,4 +191,7 @@ service SockcastService {
 
   // Persistent bidirectional stream maintained by sockcast-client
   rpc ConnectWorkstation(stream ClientStreamMessage) returns (stream ServerStreamMessage);
+
+  // Persistent bidirectional stream maintained by sockcast-relay when Zellij service is enabled
+  rpc ConnectRelay(stream RelayStreamMessage) returns (stream ServerToRelayMessage);
 }

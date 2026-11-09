@@ -4,6 +4,7 @@ pub mod v1 {
 
 pub mod bundle;
 pub mod crypto;
+pub mod p2p;
 pub mod ssh;
 
 #[cfg(test)]
@@ -195,5 +196,127 @@ mod tests {
         assert_eq!(decoded.node_signing_key.to_bytes(), node_sk.to_bytes());
         assert_eq!(decoded.grant, grant);
         assert!(verify_node_grant(&decoded.grant, 1_750_000_000).is_ok());
+    }
+
+    #[test]
+    fn test_zellij_p2p_signing_stun_and_cipher() {
+        use super::crypto::{sign_zellij_tunnel_frame, verify_zellij_tunnel_frame};
+        use super::p2p::{
+            build_stun_binding_request, derive_p2p_session_keys, parse_stun_binding_response,
+            P2pEndpointHandshake, P2pStreamCipher, STUN_ATTR_XOR_MAPPED_ADDRESS,
+            STUN_BINDING_RESPONSE, STUN_MAGIC_COOKIE,
+        };
+        use super::v1::{ZellijFrameType, ZellijTunnelFrame};
+
+        let user_sk = SigningKey::from_bytes(&[0x11; 32]);
+        let client_sk = SigningKey::from_bytes(&[0x22; 32]);
+        let relay_sk = SigningKey::from_bytes(&[0x33; 32]);
+
+        let mut client_grant = NodeGrant {
+            user_id: String::new(),
+            user_pubkey: Vec::new(),
+            node_id: "bandura".to_string(),
+            role: NodeRole::Client as i32,
+            node_pubkey: client_sk.verifying_key().to_bytes().to_vec(),
+            issued_at_unix_sec: 1_700_000_000,
+            expires_at_unix_sec: 0,
+            user_signature: Vec::new(),
+        };
+        sign_node_grant(&mut client_grant, &user_sk);
+
+        let mut relay_grant = NodeGrant {
+            user_id: String::new(),
+            user_pubkey: Vec::new(),
+            node_id: "sunduk.stingr.net".to_string(),
+            role: NodeRole::Relay as i32,
+            node_pubkey: relay_sk.verifying_key().to_bytes().to_vec(),
+            issued_at_unix_sec: 1_700_000_000,
+            expires_at_unix_sec: 0,
+            user_signature: Vec::new(),
+        };
+        sign_node_grant(&mut relay_grant, &user_sk);
+
+        let offer_hs = P2pEndpointHandshake::new(
+            vec!["192.168.1.10:50001".to_string()],
+            vec!["203.0.113.10:50002".to_string()],
+        );
+        let mut offer_frame = ZellijTunnelFrame {
+            tunnel_id: "p2p-1".to_string(),
+            relay_node_id: "sunduk.stingr.net".to_string(),
+            client_node_id: "bandura".to_string(),
+            frame_type: ZellijFrameType::P2pOffer as i32,
+            payload: offer_hs.to_bytes(),
+            error_message: String::new(),
+            sender_grant: Some(client_grant.clone()),
+            sender_signature: Vec::new(),
+        };
+        sign_zellij_tunnel_frame(&mut offer_frame, &client_sk).unwrap();
+        assert!(verify_zellij_tunnel_frame(
+            &offer_frame,
+            NodeRole::Client,
+            &relay_grant.user_pubkey,
+            1_750_000_000
+        )
+        .is_ok());
+
+        let answer_hs = P2pEndpointHandshake::new(
+            vec!["192.168.1.20:60001".to_string()],
+            vec!["198.51.100.20:60002".to_string()],
+        );
+        let mut answer_frame = ZellijTunnelFrame {
+            tunnel_id: "p2p-1".to_string(),
+            relay_node_id: "sunduk.stingr.net".to_string(),
+            client_node_id: "bandura".to_string(),
+            frame_type: ZellijFrameType::P2pAnswer as i32,
+            payload: answer_hs.to_bytes(),
+            error_message: String::new(),
+            sender_grant: Some(relay_grant.clone()),
+            sender_signature: Vec::new(),
+        };
+        sign_zellij_tunnel_frame(&mut answer_frame, &relay_sk).unwrap();
+        assert!(verify_zellij_tunnel_frame(
+            &answer_frame,
+            NodeRole::Relay,
+            &client_grant.user_pubkey,
+            1_750_000_000
+        )
+        .is_ok());
+
+        let (c_tok, r_tok, key) = derive_p2p_session_keys(
+            "p2p-1",
+            &offer_hs,
+            &offer_frame.sender_signature,
+            &answer_hs,
+            &answer_frame.sender_signature,
+        );
+        assert_ne!(c_tok, r_tok);
+
+        let mut enc = P2pStreamCipher::new(key, b"c2r");
+        let mut dec = P2pStreamCipher::new(key, b"c2r");
+        let mut buf = b"GET /work HTTP/1.1\r\nHost: 127.0.0.1:8082\r\n\r\n".to_vec();
+        let orig = buf.clone();
+        enc.apply_keystream(&mut buf);
+        assert_ne!(buf, orig);
+        dec.apply_keystream(&mut buf);
+        assert_eq!(buf, orig);
+
+        // STUN Binding Request + XOR-MAPPED-ADDRESS Response
+        let (_req_pkt, tx_id) = build_stun_binding_request();
+        let ip_u32 = u32::from_be_bytes([203, 0, 113, 42]) ^ STUN_MAGIC_COOKIE;
+        let xport = 54321u16 ^ ((STUN_MAGIC_COOKIE >> 16) as u16);
+        let mut resp = Vec::new();
+        resp.extend_from_slice(&STUN_BINDING_RESPONSE.to_be_bytes());
+        resp.extend_from_slice(&12u16.to_be_bytes());
+        resp.extend_from_slice(&STUN_MAGIC_COOKIE.to_be_bytes());
+        resp.extend_from_slice(&tx_id);
+        resp.extend_from_slice(&STUN_ATTR_XOR_MAPPED_ADDRESS.to_be_bytes());
+        resp.extend_from_slice(&8u16.to_be_bytes());
+        resp.push(0);
+        resp.push(0x01); // IPv4
+        resp.extend_from_slice(&xport.to_be_bytes());
+        resp.extend_from_slice(&ip_u32.to_be_bytes());
+
+        let parsed_addr = parse_stun_binding_response(&resp, &tx_id).unwrap();
+        assert_eq!(parsed_addr.to_string(), "203.0.113.42:54321");
     }
 }

@@ -184,8 +184,84 @@ pub struct CancelSignRequest {
     pub reason: ::prost::alloc::string::String,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
+pub struct ZellijSessionInfo {
+    #[prost(string, tag = "1")]
+    pub name: ::prost::alloc::string::String,
+    #[prost(string, tag = "2")]
+    pub created_info: ::prost::alloc::string::String,
+    #[prost(bool, tag = "3")]
+    pub exited: bool,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct RelayZellijStatus {
+    #[prost(string, tag = "1")]
+    pub node_id: ::prost::alloc::string::String,
+    #[prost(bool, tag = "2")]
+    pub zellij_enabled: bool,
+    #[prost(message, repeated, tag = "3")]
+    pub sessions: ::prost::alloc::vec::Vec<ZellijSessionInfo>,
+    #[prost(uint64, tag = "4")]
+    pub updated_at_unix_ms: u64,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct ZellijHostList {
+    #[prost(message, repeated, tag = "1")]
+    pub hosts: ::prost::alloc::vec::Vec<RelayZellijStatus>,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct ZellijTunnelFrame {
+    #[prost(string, tag = "1")]
+    pub tunnel_id: ::prost::alloc::string::String,
+    #[prost(string, tag = "2")]
+    pub relay_node_id: ::prost::alloc::string::String,
+    #[prost(string, tag = "3")]
+    pub client_node_id: ::prost::alloc::string::String,
+    #[prost(enumeration = "ZellijFrameType", tag = "4")]
+    pub frame_type: i32,
+    #[prost(bytes = "vec", tag = "5")]
+    pub payload: ::prost::alloc::vec::Vec<u8>,
+    #[prost(string, tag = "6")]
+    pub error_message: ::prost::alloc::string::String,
+    #[prost(message, optional, tag = "7")]
+    pub sender_grant: ::core::option::Option<NodeGrant>,
+    #[prost(bytes = "vec", tag = "8")]
+    pub sender_signature: ::prost::alloc::vec::Vec<u8>,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct RelayStreamMessage {
+    #[prost(oneof = "relay_stream_message::Payload", tags = "1, 2, 3")]
+    pub payload: ::core::option::Option<relay_stream_message::Payload>,
+}
+pub mod relay_stream_message {
+    #[derive(Clone, PartialEq, ::prost::Oneof)]
+    pub enum Payload {
+        #[prost(message, tag = "1")]
+        AuthHandshake(super::NodeAuth),
+        #[prost(message, tag = "2")]
+        ZellijStatus(super::RelayZellijStatus),
+        #[prost(message, tag = "3")]
+        ZellijFrame(super::ZellijTunnelFrame),
+    }
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct ServerToRelayMessage {
+    #[prost(oneof = "server_to_relay_message::Payload", tags = "1, 2, 3")]
+    pub payload: ::core::option::Option<server_to_relay_message::Payload>,
+}
+pub mod server_to_relay_message {
+    #[derive(Clone, PartialEq, ::prost::Oneof)]
+    pub enum Payload {
+        #[prost(uint64, tag = "1")]
+        ServerHeartbeatEpochMs(u64),
+        #[prost(bool, tag = "2")]
+        RefreshSessions(bool),
+        #[prost(message, tag = "3")]
+        ZellijFrame(super::ZellijTunnelFrame),
+    }
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ClientStreamMessage {
-    #[prost(oneof = "client_stream_message::Payload", tags = "1, 2, 3, 4")]
+    #[prost(oneof = "client_stream_message::Payload", tags = "1, 2, 3, 4, 5, 6")]
     pub payload: ::core::option::Option<client_stream_message::Payload>,
 }
 /// Nested message and enum types in `ClientStreamMessage`.
@@ -204,11 +280,17 @@ pub mod client_stream_message {
         /// Sent after policy auto-approve or user UI decision
         #[prost(message, tag = "4")]
         SignResponse(super::SignResponse),
+        /// Requests current ZellijHostList for this user
+        #[prost(bool, tag = "5")]
+        RequestZellijHosts(bool),
+        /// Tunnel frame or P2P_OFFER to relay_node_id
+        #[prost(message, tag = "6")]
+        ZellijFrame(super::ZellijTunnelFrame),
     }
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ServerStreamMessage {
-    #[prost(oneof = "server_stream_message::Payload", tags = "1, 2, 3")]
+    #[prost(oneof = "server_stream_message::Payload", tags = "1, 2, 3, 4, 5")]
     pub payload: ::core::option::Option<server_stream_message::Payload>,
 }
 /// Nested message and enum types in `ServerStreamMessage`.
@@ -221,6 +303,43 @@ pub mod server_stream_message {
         CancelSignRequest(super::CancelSignRequest),
         #[prost(uint64, tag = "3")]
         ServerHeartbeatEpochMs(u64),
+        #[prost(message, tag = "4")]
+        ZellijHostList(super::ZellijHostList),
+        #[prost(message, tag = "5")]
+        ZellijFrame(super::ZellijTunnelFrame),
+    }
+}
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
+#[repr(i32)]
+pub enum ZellijFrameType {
+    Unspecified = 0,
+    Open = 1,
+    Data = 2,
+    Close = 3,
+    P2pOffer = 4,
+    P2pAnswer = 5,
+}
+impl ZellijFrameType {
+    pub fn as_str_name(&self) -> &'static str {
+        match self {
+            Self::Unspecified => "ZELLIJ_FRAME_TYPE_UNSPECIFIED",
+            Self::Open => "ZELLIJ_FRAME_TYPE_OPEN",
+            Self::Data => "ZELLIJ_FRAME_TYPE_DATA",
+            Self::Close => "ZELLIJ_FRAME_TYPE_CLOSE",
+            Self::P2pOffer => "ZELLIJ_FRAME_TYPE_P2P_OFFER",
+            Self::P2pAnswer => "ZELLIJ_FRAME_TYPE_P2P_ANSWER",
+        }
+    }
+    pub fn from_str_name(value: &str) -> ::core::option::Option<Self> {
+        match value {
+            "ZELLIJ_FRAME_TYPE_UNSPECIFIED" => Some(Self::Unspecified),
+            "ZELLIJ_FRAME_TYPE_OPEN" => Some(Self::Open),
+            "ZELLIJ_FRAME_TYPE_DATA" => Some(Self::Data),
+            "ZELLIJ_FRAME_TYPE_CLOSE" => Some(Self::Close),
+            "ZELLIJ_FRAME_TYPE_P2P_OFFER" => Some(Self::P2pOffer),
+            "ZELLIJ_FRAME_TYPE_P2P_ANSWER" => Some(Self::P2pAnswer),
+            _ => None,
+        }
     }
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, ::prost::Enumeration)]
@@ -418,6 +537,35 @@ pub mod sockcast_service_client {
                 );
             self.inner.streaming(req, path, codec).await
         }
+        /// Persistent bidirectional stream maintained by sockcast-relay when Zellij service is enabled
+        pub async fn connect_relay(
+            &mut self,
+            request: impl tonic::IntoStreamingRequest<
+                Message = super::RelayStreamMessage,
+            >,
+        ) -> std::result::Result<
+            tonic::Response<tonic::codec::Streaming<super::ServerToRelayMessage>>,
+            tonic::Status,
+        > {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::unknown(
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic::codec::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/sockcast.v1.SockcastService/ConnectRelay",
+            );
+            let mut req = request.into_streaming_request();
+            req.extensions_mut()
+                .insert(
+                    GrpcMethod::new("sockcast.v1.SockcastService", "ConnectRelay"),
+                );
+            self.inner.streaming(req, path, codec).await
+        }
     }
 }
 /// Generated server implementations.
@@ -457,6 +605,20 @@ pub mod sockcast_service_server {
             request: tonic::Request<tonic::Streaming<super::ClientStreamMessage>>,
         ) -> std::result::Result<
             tonic::Response<Self::ConnectWorkstationStream>,
+            tonic::Status,
+        >;
+        /// Server streaming response type for the ConnectRelay method.
+        type ConnectRelayStream: tonic::codegen::tokio_stream::Stream<
+                Item = std::result::Result<super::ServerToRelayMessage, tonic::Status>,
+            >
+            + std::marker::Send
+            + 'static;
+        /// Persistent bidirectional stream maintained by sockcast-relay when Zellij service is enabled
+        async fn connect_relay(
+            &self,
+            request: tonic::Request<tonic::Streaming<super::RelayStreamMessage>>,
+        ) -> std::result::Result<
+            tonic::Response<Self::ConnectRelayStream>,
             tonic::Status,
         >;
     }
@@ -660,6 +822,55 @@ pub mod sockcast_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = ConnectWorkstationSvc(inner);
+                        let codec = tonic::codec::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            )
+                            .apply_max_message_size_config(
+                                max_decoding_message_size,
+                                max_encoding_message_size,
+                            );
+                        let res = grpc.streaming(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/sockcast.v1.SockcastService/ConnectRelay" => {
+                    #[allow(non_camel_case_types)]
+                    struct ConnectRelaySvc<T: SockcastService>(pub Arc<T>);
+                    impl<
+                        T: SockcastService,
+                    > tonic::server::StreamingService<super::RelayStreamMessage>
+                    for ConnectRelaySvc<T> {
+                        type Response = super::ServerToRelayMessage;
+                        type ResponseStream = T::ConnectRelayStream;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::ResponseStream>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<
+                                tonic::Streaming<super::RelayStreamMessage>,
+                            >,
+                        ) -> Self::Future {
+                            let inner = Arc::clone(&self.0);
+                            let fut = async move {
+                                <T as SockcastService>::connect_relay(&inner, request)
+                                    .await
+                            };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let max_decoding_message_size = self.max_decoding_message_size;
+                    let max_encoding_message_size = self.max_encoding_message_size;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let method = ConnectRelaySvc(inner);
                         let codec = tonic::codec::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
