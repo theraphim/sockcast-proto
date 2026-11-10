@@ -475,11 +475,13 @@ pub fn parse_openssh_rsa_private_fields(
 
 pub fn parse_classic_rsa_pem(
     pem: &str,
-    _passphrase: Option<&str>,
+    passphrase: Option<&str>,
 ) -> Result<(RsaPrivateKey, String), SshKeyError> {
     let mut header_kind = "";
     let mut b64_body = String::new();
     let mut in_body = false;
+    let mut is_encrypted = false;
+    let mut dek_info: Option<String> = None;
 
     for line in pem.lines() {
         let trimmed = line.trim();
@@ -499,10 +501,14 @@ pub fn parse_classic_rsa_pem(
             }
         }
         if in_body {
-            if trimmed.contains("ENCRYPTED") {
-                return Err(SshKeyError::PassphraseRequired);
-            }
-            if trimmed.contains(':') {
+            if let Some((k, v)) = trimmed.split_once(':') {
+                let key_lower = k.trim().to_ascii_lowercase();
+                let val_trimmed = v.trim();
+                if key_lower == "proc-type" && val_trimmed.to_ascii_uppercase().contains("ENCRYPTED") {
+                    is_encrypted = true;
+                } else if key_lower == "dek-info" {
+                    dek_info = Some(val_trimmed.to_string());
+                }
                 continue;
             }
             if !trimmed.is_empty() {
@@ -517,9 +523,23 @@ pub fn parse_classic_rsa_pem(
         ));
     }
 
-    let der = STANDARD
+    let mut der = STANDARD
         .decode(b64_body.as_bytes())
         .map_err(|e| SshKeyError::InvalidFormat(format!("PEM base64 decode error: {e}")))?;
+
+    if is_encrypted || dek_info.is_some() {
+        let pass = passphrase.filter(|s| !s.is_empty()).ok_or(SshKeyError::PassphraseRequired)?;
+        let dek = dek_info.ok_or_else(|| {
+            SshKeyError::InvalidFormat("encrypted PEM missing DEK-Info header".to_string())
+        })?;
+        let (alg, iv_hex) = dek.split_once(',').ok_or_else(|| {
+            SshKeyError::InvalidFormat("invalid DEK-Info header".to_string())
+        })?;
+        let iv = decode_hex_bytes(iv_hex.trim()).ok_or_else(|| {
+            SshKeyError::InvalidFormat("invalid DEK-Info IV hex".to_string())
+        })?;
+        der = crate::des3_pem::decrypt_legacy_pem_der(alg, &iv, &der, pass.as_bytes())?;
+    }
 
     let pkcs1_der = if header_kind == "PKCS8" {
         extract_pkcs1_from_pkcs8(&der)?
@@ -529,6 +549,20 @@ pub fn parse_classic_rsa_pem(
 
     let rsa = parse_pkcs1_der(pkcs1_der)?;
     Ok((rsa, "rsa-pem-key".to_string()))
+}
+
+fn decode_hex_bytes(hex_str: &str) -> Option<Vec<u8>> {
+    if hex_str.len() % 2 != 0 {
+        return None;
+    }
+    let mut out = Vec::with_capacity(hex_str.len() / 2);
+    let bytes = hex_str.as_bytes();
+    for chunk in bytes.chunks_exact(2) {
+        let hi = (chunk[0] as char).to_digit(16)? as u8;
+        let lo = (chunk[1] as char).to_digit(16)? as u8;
+        out.push((hi << 4) | lo);
+    }
+    Some(out)
 }
 
 fn read_asn1_tag_and_value<'a>(cursor: &mut &'a [u8], expected_tag: u8) -> Option<&'a [u8]> {

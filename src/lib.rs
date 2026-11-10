@@ -4,6 +4,7 @@ pub mod v1 {
 
 pub mod bundle;
 pub mod crypto;
+pub(crate) mod des3_pem;
 pub(crate) mod openssh_cipher;
 pub mod p2p;
 pub(crate) mod rsa_ssh;
@@ -656,6 +657,56 @@ mod tests {
         assert_eq!(sr.handled_by_node_id, "chrome-workstation");
         ssh_key
             .verify_ssh_signature_blob(challenge, &sr.signature_blob)
+            .unwrap();
+    }
+
+    #[test]
+    fn test_des3_encrypted_rsa_pem_key() {
+        use super::ssh::{LoadedSshKey, SshKeyError};
+        const DES3_RSA_PEM: &str = "\
+-----BEGIN RSA PRIVATE KEY-----
+Proc-Type: 4,ENCRYPTED
+DEK-Info: DES-EDE3-CBC,01AA5FFFC3713A44
+
+RM9DdIv31APmzuuQMyH3nOOfBglW02vSPg4QoYPIxK+kds1lqSEoCpaPs6hIuGm7
+mVD+kL+3Qax9up6uD4Mu4e5KjNqObbJtrrBAJt2UfGe8pwFkvS2u4+/ieYzO6iy3
+bD0QoCWCO61iAKf4w3OZOH2NeIffzavjH8gIsS6LxwGFZzSyZNwl8O0KR5szQdSZ
+lwQkHnYRS4MdiA7MK1OFlZalHoMkgSbPeOy50g74pwMYpZCp/3Gx1xtCGGPwVBQr
+nUGErHN6TaRfqq1jZ380CfxISaAQNQ44NdTwIXeX7c+3Wg5q1cegrg6hIDUSSI6i
+Unil9xBxhwfuaDPDz2Z8FDSDExtFGe/xD+KIZnq3Dfe0tJu0Djd7Zpn3EWxEQ1k5
+QX0AxYU7qVXxIwX1ZvnUkWN18Zg44uWnbI7VejRuq2OHIUQf6LWe62giJs+acMCT
+QwtMI+IyxXIGJFAOuqhPvoN7KPOo6E05j9HVy+eHQlse67/p1XmgWW2punn/lRp8
++0aqO7yfiNPZbURPKB3uXS+MiH89yCDGnxOfCqgKdVk9ZWTbeMkzLF3iS5O5v7yx
++LpaM/zUv5eMXS/1Cl3PqjCkvnPjKWpEP6lWPk7Mlmmo/VCPVgPdGmmPDsE+p71y
+YE8bfRhW2pt+fJLu8vg07KdG4AvjgXH1OAA0+agQA7O4pHQ/bGGlx6cICKGvOV3+
+dHzsFSX02JICYJ+3xAiZKj8TjmVqhFmWMbyPkhWT4auHGVfcrOhjb3tx1VEVYjsM
+tz/jnMhOnAAZ8LfXYe2LujW8mR4jPR5sKBLyBcOhS5PHaS95a7pPfH5YrNDCa+iX
+66eitDxco9Ookz1eK5j4wuSwFiGaQYEAvAGptOwnVz+chjegwSnHdoZgZUAM/mWz
+rgXPsdymlKYOePbLUeXrZdJ2Mik6ThLWZjcz/hjdrdUaTbHMQkNjmsJCLompMfX+
+ZNOnD08karqJj7lfWW2u0y2liuxyYo6ZOk0+J/CbthiuAao3IGLrf9pCD3vFwaS5
+yTDuJbFwRN5hWGY9IPNojo2TOHGjJfhOU16OOp+tIoPZzXEXoqePG/F/OX8Ht8Mg
+sYvCUf1sa7hPfdZLkhqRdayDqoAv53x1ZX11QXoVg1WOYnwsnyEF5bSl68V8GuuF
+SHGQrb1ZP/czgjlZYZiZu4/a+byKsdUqt/Z3LHUm3uHrBDv4Fh3jA+LXimxeZb7d
+M3KEhCAj7LnMa74wvQZybAyP+sAaywjdcHa5O+oNM3Bb1mzZcPuTP8gBxTmgzw3L
+Df2TTqEVzArTVfjO7kyPDQkXMJDLTPezSUTvkNSieYraIY5VXaTDcaQVo3Vs7TEZ
+LnBFAFLOuc1ezW2E2VX1PLC1KIdhbZDuQFztGVjHgPRYg6Oc8Dqc9a79v50Z5Iku
+jJjnnEKSNAOdHtA35wLXu54frlvdjX0ke9avrx27/XVGzfPOjN8KVUS1gwmA+BeR
+nJGOFJFTXXsIfIvFV4Nrd4iTnkwq6oZaW0yjHk+4UsAJ6xqxCZUE1sQrejKhmigs
+O/ovlk9wRix3IoPnrJfrDxYCOePLCipAMH2xbnNOPT+xA2MZg8a/tTAcFM+f9uEq
+-----END RSA PRIVATE KEY-----";
+
+        assert!(matches!(
+            LoadedSshKey::parse_openssh_pem(DES3_RSA_PEM, None),
+            Err(SshKeyError::PassphraseRequired)
+        ));
+        assert!(matches!(
+            LoadedSshKey::parse_openssh_pem(DES3_RSA_PEM, Some("wrong")),
+            Err(SshKeyError::InvalidPassphrase)
+        ));
+        let key = LoadedSshKey::parse_openssh_pem(DES3_RSA_PEM, Some("secret123")).unwrap();
+        assert_eq!(key.public_key_proto().key_type, "ssh-rsa");
+        let sig = key.sign_ssh_data(b"hello des3 rsa", 4).unwrap();
+        key.verify_ssh_signature_blob(b"hello des3 rsa", &sig)
             .unwrap();
     }
 }
