@@ -1,7 +1,7 @@
 syntax = "proto3";
-package sockcast.v1;
+package sshcast.v1;
 
-option go_package = "github.com/theraphim/sockcast-proto/gen/go/sockcast/v1;sockcastv1";
+option go_package = "stingr.net/go/sshcast-proto/gen/go/sshcast/v1;sshcastv1";
 
 enum NodeRole {
   NODE_ROLE_UNSPECIFIED = 0;
@@ -26,7 +26,7 @@ message NodeAuth {
   NodeGrant grant = 1;
   uint64 timestamp_unix_ms = 2;
   bytes nonce = 3;
-  bytes node_signature = 4;         // Signs canonical ("sockcast-rpc-auth-v1" || grant.user_signature || timestamp || nonce)
+  bytes node_signature = 4;         // Signs canonical ("sshcast-rpc-auth-v1" || grant.user_signature || timestamp || nonce)
 }
 
 message PublicKey {
@@ -79,9 +79,9 @@ message SignRequest {
   uint32 flags = 5;                 // SSH_AGENT_RSA_SHA2_256 (2), SSH_AGENT_RSA_SHA2_512 (4)
   ProcessContext process_context = 6;
   SshAuthContext ssh_auth_context = 7;
-  NodeGrant relay_grant = 8;        // Verified end-to-end by sockcast-client
+  NodeGrant relay_grant = 8;        // Verified end-to-end by sshcast-client
   bytes relay_signature = 9;        // Ed25519 signature by relay's node_privkey over fields 1..8
-  NodeAuth auth = 10;               // RPC caller authentication verified by sockcast-server
+  NodeAuth auth = 10;               // RPC caller authentication verified by sshcast-server
 }
 
 message SignResponse {
@@ -100,7 +100,7 @@ message WorkstationStatus {
   repeated PublicKey keys = 4;      // Filtered local public keys
 }
 
-// Immediate automated receipt sent by sockcast-client within <1.5s of receiving SignRequest
+// Immediate automated receipt sent by sshcast-client within <1.5s of receiving SignRequest
 message SignAck {
   string request_id = 1;
 }
@@ -184,14 +184,14 @@ message ServerStreamMessage {
   }
 }
 
-service SockcastService {
-  // Called by sockcast-relay
+service SshcastService {
+  // Called by sshcast-relay
   rpc GetIdentities(GetIdentitiesRequest) returns (GetIdentitiesResponse);
   rpc Sign(SignRequest) returns (SignResponse);
 
-  // Persistent bidirectional stream maintained by sockcast-client
+  // Persistent bidirectional stream maintained by sshcast-client
   rpc ConnectWorkstation(stream ClientStreamMessage) returns (stream ServerStreamMessage);
 
-  // Persistent bidirectional stream maintained by sockcast-relay when Zellij service is enabled
+  // Persistent bidirectional stream maintained by sshcast-relay when Zellij service is enabled
   rpc ConnectRelay(stream RelayStreamMessage) returns (stream ServerToRelayMessage);
 }

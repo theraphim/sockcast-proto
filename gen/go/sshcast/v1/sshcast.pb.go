@@ -2,9 +2,9 @@
 // versions:
 // 	protoc-gen-go v1.36.12
 // 	protoc        v7.36.2
-// source: sockcast/v1/sockcast.proto
+// source: sshcast/v1/sshcast.proto
 
-package sockcastv1
+package sshcastv1
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -54,11 +54,11 @@ func (x NodeRole) String() string {
 }
 
 func (NodeRole) Descriptor() protoreflect.EnumDescriptor {
-	return file_sockcast_v1_sockcast_proto_enumTypes[0].Descriptor()
+	return file_sshcast_v1_sshcast_proto_enumTypes[0].Descriptor()
 }
 
 func (NodeRole) Type() protoreflect.EnumType {
-	return &file_sockcast_v1_sockcast_proto_enumTypes[0]
+	return &file_sshcast_v1_sshcast_proto_enumTypes[0]
 }
 
 func (x NodeRole) Number() protoreflect.EnumNumber {
@@ -67,7 +67,7 @@ func (x NodeRole) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use NodeRole.Descriptor instead.
 func (NodeRole) EnumDescriptor() ([]byte, []int) {
-	return file_sockcast_v1_sockcast_proto_rawDescGZIP(), []int{0}
+	return file_sshcast_v1_sshcast_proto_rawDescGZIP(), []int{0}
 }
 
 type ZellijFrameType int32
@@ -112,11 +112,11 @@ func (x ZellijFrameType) String() string {
 }
 
 func (ZellijFrameType) Descriptor() protoreflect.EnumDescriptor {
-	return file_sockcast_v1_sockcast_proto_enumTypes[1].Descriptor()
+	return file_sshcast_v1_sshcast_proto_enumTypes[1].Descriptor()
 }
 
 func (ZellijFrameType) Type() protoreflect.EnumType {
-	return &file_sockcast_v1_sockcast_proto_enumTypes[1]
+	return &file_sshcast_v1_sshcast_proto_enumTypes[1]
 }
 
 func (x ZellijFrameType) Number() protoreflect.EnumNumber {
@@ -125,7 +125,7 @@ func (x ZellijFrameType) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use ZellijFrameType.Descriptor instead.
 func (ZellijFrameType) EnumDescriptor() ([]byte, []int) {
-	return file_sockcast_v1_sockcast_proto_rawDescGZIP(), []int{1}
+	return file_sshcast_v1_sshcast_proto_rawDescGZIP(), []int{1}
 }
 
 type NodeGrant struct {
@@ -133,7 +133,7 @@ type NodeGrant struct {
 	UserId           string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	UserPubkey       []byte                 `protobuf:"bytes,2,opt,name=user_pubkey,json=userPubkey,proto3" json:"user_pubkey,omitempty"`
 	NodeId           string                 `protobuf:"bytes,3,opt,name=node_id,json=nodeId,proto3" json:"node_id,omitempty"`
-	Role             NodeRole               `protobuf:"varint,4,opt,name=role,proto3,enum=sockcast.v1.NodeRole" json:"role,omitempty"`
+	Role             NodeRole               `protobuf:"varint,4,opt,name=role,proto3,enum=sshcast.v1.NodeRole" json:"role,omitempty"`
 	NodePubkey       []byte                 `protobuf:"bytes,5,opt,name=node_pubkey,json=nodePubkey,proto3" json:"node_pubkey,omitempty"`
 	IssuedAtUnixSec  uint64                 `protobuf:"varint,6,opt,name=issued_at_unix_sec,json=issuedAtUnixSec,proto3" json:"issued_at_unix_sec,omitempty"`
 	ExpiresAtUnixSec uint64                 `protobuf:"varint,7,opt,name=expires_at_unix_sec,json=expiresAtUnixSec,proto3" json:"expires_at_unix_sec,omitempty"`
@@ -144,7 +144,7 @@ type NodeGrant struct {
 
 func (x *NodeGrant) Reset() {
 	*x = NodeGrant{}
-	mi := &file_sockcast_v1_sockcast_proto_msgTypes[0]
+	mi := &file_sshcast_v1_sshcast_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -156,7 +156,7 @@ func (x *NodeGrant) String() string {
 func (*NodeGrant) ProtoMessage() {}
 
 func (x *NodeGrant) ProtoReflect() protoreflect.Message {
-	mi := &file_sockcast_v1_sockcast_proto_msgTypes[0]
+	mi := &file_sshcast_v1_sshcast_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -169,7 +169,7 @@ func (x *NodeGrant) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use NodeGrant.ProtoReflect.Descriptor instead.
 func (*NodeGrant) Descriptor() ([]byte, []int) {
-	return file_sockcast_v1_sockcast_proto_rawDescGZIP(), []int{0}
+	return file_sshcast_v1_sshcast_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *NodeGrant) GetUserId() string {
@@ -240,7 +240,7 @@ type NodeAuth struct {
 
 func (x *NodeAuth) Reset() {
 	*x = NodeAuth{}
-	mi := &file_sockcast_v1_sockcast_proto_msgTypes[1]
+	mi := &file_sshcast_v1_sshcast_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -252,7 +252,7 @@ func (x *NodeAuth) String() string {
 func (*NodeAuth) ProtoMessage() {}
 
 func (x *NodeAuth) ProtoReflect() protoreflect.Message {
-	mi := &file_sockcast_v1_sockcast_proto_msgTypes[1]
+	mi := &file_sshcast_v1_sshcast_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -265,7 +265,7 @@ func (x *NodeAuth) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use NodeAuth.ProtoReflect.Descriptor instead.
 func (*NodeAuth) Descriptor() ([]byte, []int) {
-	return file_sockcast_v1_sockcast_proto_rawDescGZIP(), []int{1}
+	return file_sshcast_v1_sshcast_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *NodeAuth) GetGrant() *NodeGrant {
@@ -308,7 +308,7 @@ type PublicKey struct {
 
 func (x *PublicKey) Reset() {
 	*x = PublicKey{}
-	mi := &file_sockcast_v1_sockcast_proto_msgTypes[2]
+	mi := &file_sshcast_v1_sshcast_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -320,7 +320,7 @@ func (x *PublicKey) String() string {
 func (*PublicKey) ProtoMessage() {}
 
 func (x *PublicKey) ProtoReflect() protoreflect.Message {
-	mi := &file_sockcast_v1_sockcast_proto_msgTypes[2]
+	mi := &file_sshcast_v1_sshcast_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -333,7 +333,7 @@ func (x *PublicKey) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PublicKey.ProtoReflect.Descriptor instead.
 func (*PublicKey) Descriptor() ([]byte, []int) {
-	return file_sockcast_v1_sockcast_proto_rawDescGZIP(), []int{2}
+	return file_sshcast_v1_sshcast_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *PublicKey) GetKeyBlob() []byte {
@@ -375,7 +375,7 @@ type ProcessAncestor struct {
 
 func (x *ProcessAncestor) Reset() {
 	*x = ProcessAncestor{}
-	mi := &file_sockcast_v1_sockcast_proto_msgTypes[3]
+	mi := &file_sshcast_v1_sshcast_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -387,7 +387,7 @@ func (x *ProcessAncestor) String() string {
 func (*ProcessAncestor) ProtoMessage() {}
 
 func (x *ProcessAncestor) ProtoReflect() protoreflect.Message {
-	mi := &file_sockcast_v1_sockcast_proto_msgTypes[3]
+	mi := &file_sshcast_v1_sshcast_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -400,7 +400,7 @@ func (x *ProcessAncestor) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ProcessAncestor.ProtoReflect.Descriptor instead.
 func (*ProcessAncestor) Descriptor() ([]byte, []int) {
-	return file_sockcast_v1_sockcast_proto_rawDescGZIP(), []int{3}
+	return file_sshcast_v1_sshcast_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *ProcessAncestor) GetPid() uint32 {
@@ -439,7 +439,7 @@ type ProcessContext struct {
 
 func (x *ProcessContext) Reset() {
 	*x = ProcessContext{}
-	mi := &file_sockcast_v1_sockcast_proto_msgTypes[4]
+	mi := &file_sshcast_v1_sshcast_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -451,7 +451,7 @@ func (x *ProcessContext) String() string {
 func (*ProcessContext) ProtoMessage() {}
 
 func (x *ProcessContext) ProtoReflect() protoreflect.Message {
-	mi := &file_sockcast_v1_sockcast_proto_msgTypes[4]
+	mi := &file_sshcast_v1_sshcast_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -464,7 +464,7 @@ func (x *ProcessContext) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ProcessContext.ProtoReflect.Descriptor instead.
 func (*ProcessContext) Descriptor() ([]byte, []int) {
-	return file_sockcast_v1_sockcast_proto_rawDescGZIP(), []int{4}
+	return file_sshcast_v1_sshcast_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *ProcessContext) GetHostname() string {
@@ -529,7 +529,7 @@ type SshAuthContext struct {
 
 func (x *SshAuthContext) Reset() {
 	*x = SshAuthContext{}
-	mi := &file_sockcast_v1_sockcast_proto_msgTypes[5]
+	mi := &file_sshcast_v1_sshcast_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -541,7 +541,7 @@ func (x *SshAuthContext) String() string {
 func (*SshAuthContext) ProtoMessage() {}
 
 func (x *SshAuthContext) ProtoReflect() protoreflect.Message {
-	mi := &file_sockcast_v1_sockcast_proto_msgTypes[5]
+	mi := &file_sshcast_v1_sshcast_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -554,7 +554,7 @@ func (x *SshAuthContext) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SshAuthContext.ProtoReflect.Descriptor instead.
 func (*SshAuthContext) Descriptor() ([]byte, []int) {
-	return file_sockcast_v1_sockcast_proto_rawDescGZIP(), []int{5}
+	return file_sshcast_v1_sshcast_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *SshAuthContext) GetIsUserauthRequest() bool {
@@ -601,7 +601,7 @@ type GetIdentitiesRequest struct {
 
 func (x *GetIdentitiesRequest) Reset() {
 	*x = GetIdentitiesRequest{}
-	mi := &file_sockcast_v1_sockcast_proto_msgTypes[6]
+	mi := &file_sshcast_v1_sshcast_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -613,7 +613,7 @@ func (x *GetIdentitiesRequest) String() string {
 func (*GetIdentitiesRequest) ProtoMessage() {}
 
 func (x *GetIdentitiesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_sockcast_v1_sockcast_proto_msgTypes[6]
+	mi := &file_sshcast_v1_sshcast_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -626,7 +626,7 @@ func (x *GetIdentitiesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetIdentitiesRequest.ProtoReflect.Descriptor instead.
 func (*GetIdentitiesRequest) Descriptor() ([]byte, []int) {
-	return file_sockcast_v1_sockcast_proto_rawDescGZIP(), []int{6}
+	return file_sshcast_v1_sshcast_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *GetIdentitiesRequest) GetAuth() *NodeAuth {
@@ -645,7 +645,7 @@ type GetIdentitiesResponse struct {
 
 func (x *GetIdentitiesResponse) Reset() {
 	*x = GetIdentitiesResponse{}
-	mi := &file_sockcast_v1_sockcast_proto_msgTypes[7]
+	mi := &file_sshcast_v1_sshcast_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -657,7 +657,7 @@ func (x *GetIdentitiesResponse) String() string {
 func (*GetIdentitiesResponse) ProtoMessage() {}
 
 func (x *GetIdentitiesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_sockcast_v1_sockcast_proto_msgTypes[7]
+	mi := &file_sshcast_v1_sshcast_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -670,7 +670,7 @@ func (x *GetIdentitiesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetIdentitiesResponse.ProtoReflect.Descriptor instead.
 func (*GetIdentitiesResponse) Descriptor() ([]byte, []int) {
-	return file_sockcast_v1_sockcast_proto_rawDescGZIP(), []int{7}
+	return file_sshcast_v1_sshcast_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *GetIdentitiesResponse) GetKeys() []*PublicKey {
@@ -698,7 +698,7 @@ type SignRequest struct {
 
 func (x *SignRequest) Reset() {
 	*x = SignRequest{}
-	mi := &file_sockcast_v1_sockcast_proto_msgTypes[8]
+	mi := &file_sshcast_v1_sshcast_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -710,7 +710,7 @@ func (x *SignRequest) String() string {
 func (*SignRequest) ProtoMessage() {}
 
 func (x *SignRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_sockcast_v1_sockcast_proto_msgTypes[8]
+	mi := &file_sshcast_v1_sshcast_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -723,7 +723,7 @@ func (x *SignRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SignRequest.ProtoReflect.Descriptor instead.
 func (*SignRequest) Descriptor() ([]byte, []int) {
-	return file_sockcast_v1_sockcast_proto_rawDescGZIP(), []int{8}
+	return file_sshcast_v1_sshcast_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *SignRequest) GetRequestId() string {
@@ -809,7 +809,7 @@ type SignResponse struct {
 
 func (x *SignResponse) Reset() {
 	*x = SignResponse{}
-	mi := &file_sockcast_v1_sockcast_proto_msgTypes[9]
+	mi := &file_sshcast_v1_sshcast_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -821,7 +821,7 @@ func (x *SignResponse) String() string {
 func (*SignResponse) ProtoMessage() {}
 
 func (x *SignResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_sockcast_v1_sockcast_proto_msgTypes[9]
+	mi := &file_sshcast_v1_sshcast_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -834,7 +834,7 @@ func (x *SignResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SignResponse.ProtoReflect.Descriptor instead.
 func (*SignResponse) Descriptor() ([]byte, []int) {
-	return file_sockcast_v1_sockcast_proto_rawDescGZIP(), []int{9}
+	return file_sshcast_v1_sshcast_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *SignResponse) GetRequestId() string {
@@ -884,7 +884,7 @@ type WorkstationStatus struct {
 
 func (x *WorkstationStatus) Reset() {
 	*x = WorkstationStatus{}
-	mi := &file_sockcast_v1_sockcast_proto_msgTypes[10]
+	mi := &file_sshcast_v1_sshcast_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -896,7 +896,7 @@ func (x *WorkstationStatus) String() string {
 func (*WorkstationStatus) ProtoMessage() {}
 
 func (x *WorkstationStatus) ProtoReflect() protoreflect.Message {
-	mi := &file_sockcast_v1_sockcast_proto_msgTypes[10]
+	mi := &file_sshcast_v1_sshcast_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -909,7 +909,7 @@ func (x *WorkstationStatus) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use WorkstationStatus.ProtoReflect.Descriptor instead.
 func (*WorkstationStatus) Descriptor() ([]byte, []int) {
-	return file_sockcast_v1_sockcast_proto_rawDescGZIP(), []int{10}
+	return file_sshcast_v1_sshcast_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *WorkstationStatus) GetLastInputEpochMs() uint64 {
@@ -949,7 +949,7 @@ type SignAck struct {
 
 func (x *SignAck) Reset() {
 	*x = SignAck{}
-	mi := &file_sockcast_v1_sockcast_proto_msgTypes[11]
+	mi := &file_sshcast_v1_sshcast_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -961,7 +961,7 @@ func (x *SignAck) String() string {
 func (*SignAck) ProtoMessage() {}
 
 func (x *SignAck) ProtoReflect() protoreflect.Message {
-	mi := &file_sockcast_v1_sockcast_proto_msgTypes[11]
+	mi := &file_sshcast_v1_sshcast_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -974,7 +974,7 @@ func (x *SignAck) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SignAck.ProtoReflect.Descriptor instead.
 func (*SignAck) Descriptor() ([]byte, []int) {
-	return file_sockcast_v1_sockcast_proto_rawDescGZIP(), []int{11}
+	return file_sshcast_v1_sshcast_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *SignAck) GetRequestId() string {
@@ -994,7 +994,7 @@ type CancelSignRequest struct {
 
 func (x *CancelSignRequest) Reset() {
 	*x = CancelSignRequest{}
-	mi := &file_sockcast_v1_sockcast_proto_msgTypes[12]
+	mi := &file_sshcast_v1_sshcast_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1006,7 +1006,7 @@ func (x *CancelSignRequest) String() string {
 func (*CancelSignRequest) ProtoMessage() {}
 
 func (x *CancelSignRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_sockcast_v1_sockcast_proto_msgTypes[12]
+	mi := &file_sshcast_v1_sshcast_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1019,7 +1019,7 @@ func (x *CancelSignRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CancelSignRequest.ProtoReflect.Descriptor instead.
 func (*CancelSignRequest) Descriptor() ([]byte, []int) {
-	return file_sockcast_v1_sockcast_proto_rawDescGZIP(), []int{12}
+	return file_sshcast_v1_sshcast_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *CancelSignRequest) GetRequestId() string {
@@ -1047,7 +1047,7 @@ type ZellijSessionInfo struct {
 
 func (x *ZellijSessionInfo) Reset() {
 	*x = ZellijSessionInfo{}
-	mi := &file_sockcast_v1_sockcast_proto_msgTypes[13]
+	mi := &file_sshcast_v1_sshcast_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1059,7 +1059,7 @@ func (x *ZellijSessionInfo) String() string {
 func (*ZellijSessionInfo) ProtoMessage() {}
 
 func (x *ZellijSessionInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_sockcast_v1_sockcast_proto_msgTypes[13]
+	mi := &file_sshcast_v1_sshcast_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1072,7 +1072,7 @@ func (x *ZellijSessionInfo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ZellijSessionInfo.ProtoReflect.Descriptor instead.
 func (*ZellijSessionInfo) Descriptor() ([]byte, []int) {
-	return file_sockcast_v1_sockcast_proto_rawDescGZIP(), []int{13}
+	return file_sshcast_v1_sshcast_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *ZellijSessionInfo) GetName() string {
@@ -1108,7 +1108,7 @@ type RelayZellijStatus struct {
 
 func (x *RelayZellijStatus) Reset() {
 	*x = RelayZellijStatus{}
-	mi := &file_sockcast_v1_sockcast_proto_msgTypes[14]
+	mi := &file_sshcast_v1_sshcast_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1120,7 +1120,7 @@ func (x *RelayZellijStatus) String() string {
 func (*RelayZellijStatus) ProtoMessage() {}
 
 func (x *RelayZellijStatus) ProtoReflect() protoreflect.Message {
-	mi := &file_sockcast_v1_sockcast_proto_msgTypes[14]
+	mi := &file_sshcast_v1_sshcast_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1133,7 +1133,7 @@ func (x *RelayZellijStatus) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RelayZellijStatus.ProtoReflect.Descriptor instead.
 func (*RelayZellijStatus) Descriptor() ([]byte, []int) {
-	return file_sockcast_v1_sockcast_proto_rawDescGZIP(), []int{14}
+	return file_sshcast_v1_sshcast_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *RelayZellijStatus) GetNodeId() string {
@@ -1173,7 +1173,7 @@ type ZellijHostList struct {
 
 func (x *ZellijHostList) Reset() {
 	*x = ZellijHostList{}
-	mi := &file_sockcast_v1_sockcast_proto_msgTypes[15]
+	mi := &file_sshcast_v1_sshcast_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1185,7 +1185,7 @@ func (x *ZellijHostList) String() string {
 func (*ZellijHostList) ProtoMessage() {}
 
 func (x *ZellijHostList) ProtoReflect() protoreflect.Message {
-	mi := &file_sockcast_v1_sockcast_proto_msgTypes[15]
+	mi := &file_sshcast_v1_sshcast_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1198,7 +1198,7 @@ func (x *ZellijHostList) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ZellijHostList.ProtoReflect.Descriptor instead.
 func (*ZellijHostList) Descriptor() ([]byte, []int) {
-	return file_sockcast_v1_sockcast_proto_rawDescGZIP(), []int{15}
+	return file_sshcast_v1_sshcast_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *ZellijHostList) GetHosts() []*RelayZellijStatus {
@@ -1213,7 +1213,7 @@ type ZellijTunnelFrame struct {
 	TunnelId        string                 `protobuf:"bytes,1,opt,name=tunnel_id,json=tunnelId,proto3" json:"tunnel_id,omitempty"`
 	RelayNodeId     string                 `protobuf:"bytes,2,opt,name=relay_node_id,json=relayNodeId,proto3" json:"relay_node_id,omitempty"`
 	ClientNodeId    string                 `protobuf:"bytes,3,opt,name=client_node_id,json=clientNodeId,proto3" json:"client_node_id,omitempty"`
-	FrameType       ZellijFrameType        `protobuf:"varint,4,opt,name=frame_type,json=frameType,proto3,enum=sockcast.v1.ZellijFrameType" json:"frame_type,omitempty"`
+	FrameType       ZellijFrameType        `protobuf:"varint,4,opt,name=frame_type,json=frameType,proto3,enum=sshcast.v1.ZellijFrameType" json:"frame_type,omitempty"`
 	Payload         []byte                 `protobuf:"bytes,5,opt,name=payload,proto3" json:"payload,omitempty"`
 	ErrorMessage    string                 `protobuf:"bytes,6,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
 	SenderGrant     *NodeGrant             `protobuf:"bytes,7,opt,name=sender_grant,json=senderGrant,proto3" json:"sender_grant,omitempty"`
@@ -1224,7 +1224,7 @@ type ZellijTunnelFrame struct {
 
 func (x *ZellijTunnelFrame) Reset() {
 	*x = ZellijTunnelFrame{}
-	mi := &file_sockcast_v1_sockcast_proto_msgTypes[16]
+	mi := &file_sshcast_v1_sshcast_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1236,7 +1236,7 @@ func (x *ZellijTunnelFrame) String() string {
 func (*ZellijTunnelFrame) ProtoMessage() {}
 
 func (x *ZellijTunnelFrame) ProtoReflect() protoreflect.Message {
-	mi := &file_sockcast_v1_sockcast_proto_msgTypes[16]
+	mi := &file_sshcast_v1_sshcast_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1249,7 +1249,7 @@ func (x *ZellijTunnelFrame) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ZellijTunnelFrame.ProtoReflect.Descriptor instead.
 func (*ZellijTunnelFrame) Descriptor() ([]byte, []int) {
-	return file_sockcast_v1_sockcast_proto_rawDescGZIP(), []int{16}
+	return file_sshcast_v1_sshcast_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *ZellijTunnelFrame) GetTunnelId() string {
@@ -1322,7 +1322,7 @@ type RelayStreamMessage struct {
 
 func (x *RelayStreamMessage) Reset() {
 	*x = RelayStreamMessage{}
-	mi := &file_sockcast_v1_sockcast_proto_msgTypes[17]
+	mi := &file_sshcast_v1_sshcast_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1334,7 +1334,7 @@ func (x *RelayStreamMessage) String() string {
 func (*RelayStreamMessage) ProtoMessage() {}
 
 func (x *RelayStreamMessage) ProtoReflect() protoreflect.Message {
-	mi := &file_sockcast_v1_sockcast_proto_msgTypes[17]
+	mi := &file_sshcast_v1_sshcast_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1347,7 +1347,7 @@ func (x *RelayStreamMessage) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RelayStreamMessage.ProtoReflect.Descriptor instead.
 func (*RelayStreamMessage) Descriptor() ([]byte, []int) {
-	return file_sockcast_v1_sockcast_proto_rawDescGZIP(), []int{17}
+	return file_sshcast_v1_sshcast_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *RelayStreamMessage) GetPayload() isRelayStreamMessage_Payload {
@@ -1420,7 +1420,7 @@ type ServerToRelayMessage struct {
 
 func (x *ServerToRelayMessage) Reset() {
 	*x = ServerToRelayMessage{}
-	mi := &file_sockcast_v1_sockcast_proto_msgTypes[18]
+	mi := &file_sshcast_v1_sshcast_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1432,7 +1432,7 @@ func (x *ServerToRelayMessage) String() string {
 func (*ServerToRelayMessage) ProtoMessage() {}
 
 func (x *ServerToRelayMessage) ProtoReflect() protoreflect.Message {
-	mi := &file_sockcast_v1_sockcast_proto_msgTypes[18]
+	mi := &file_sshcast_v1_sshcast_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1445,7 +1445,7 @@ func (x *ServerToRelayMessage) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ServerToRelayMessage.ProtoReflect.Descriptor instead.
 func (*ServerToRelayMessage) Descriptor() ([]byte, []int) {
-	return file_sockcast_v1_sockcast_proto_rawDescGZIP(), []int{18}
+	return file_sshcast_v1_sshcast_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *ServerToRelayMessage) GetPayload() isServerToRelayMessage_Payload {
@@ -1521,7 +1521,7 @@ type ClientStreamMessage struct {
 
 func (x *ClientStreamMessage) Reset() {
 	*x = ClientStreamMessage{}
-	mi := &file_sockcast_v1_sockcast_proto_msgTypes[19]
+	mi := &file_sshcast_v1_sshcast_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1533,7 +1533,7 @@ func (x *ClientStreamMessage) String() string {
 func (*ClientStreamMessage) ProtoMessage() {}
 
 func (x *ClientStreamMessage) ProtoReflect() protoreflect.Message {
-	mi := &file_sockcast_v1_sockcast_proto_msgTypes[19]
+	mi := &file_sshcast_v1_sshcast_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1546,7 +1546,7 @@ func (x *ClientStreamMessage) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ClientStreamMessage.ProtoReflect.Descriptor instead.
 func (*ClientStreamMessage) Descriptor() ([]byte, []int) {
-	return file_sockcast_v1_sockcast_proto_rawDescGZIP(), []int{19}
+	return file_sshcast_v1_sshcast_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *ClientStreamMessage) GetPayload() isClientStreamMessage_Payload {
@@ -1666,7 +1666,7 @@ type ServerStreamMessage struct {
 
 func (x *ServerStreamMessage) Reset() {
 	*x = ServerStreamMessage{}
-	mi := &file_sockcast_v1_sockcast_proto_msgTypes[20]
+	mi := &file_sshcast_v1_sshcast_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1678,7 +1678,7 @@ func (x *ServerStreamMessage) String() string {
 func (*ServerStreamMessage) ProtoMessage() {}
 
 func (x *ServerStreamMessage) ProtoReflect() protoreflect.Message {
-	mi := &file_sockcast_v1_sockcast_proto_msgTypes[20]
+	mi := &file_sshcast_v1_sshcast_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1691,7 +1691,7 @@ func (x *ServerStreamMessage) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ServerStreamMessage.ProtoReflect.Descriptor instead.
 func (*ServerStreamMessage) Descriptor() ([]byte, []int) {
-	return file_sockcast_v1_sockcast_proto_rawDescGZIP(), []int{20}
+	return file_sshcast_v1_sshcast_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *ServerStreamMessage) GetPayload() isServerStreamMessage_Payload {
@@ -1780,226 +1780,85 @@ func (*ServerStreamMessage_ZellijHostList) isServerStreamMessage_Payload() {}
 
 func (*ServerStreamMessage_ZellijFrame) isServerStreamMessage_Payload() {}
 
-var File_sockcast_v1_sockcast_proto protoreflect.FileDescriptor
+var File_sshcast_v1_sshcast_proto protoreflect.FileDescriptor
 
-const file_sockcast_v1_sockcast_proto_rawDesc = "" +
-	"\n" +
-	"\x1asockcast/v1/sockcast.proto\x12\vsockcast.v1\"\xad\x02\n" +
-	"\tNodeGrant\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x1f\n" +
-	"\vuser_pubkey\x18\x02 \x01(\fR\n" +
-	"userPubkey\x12\x17\n" +
-	"\anode_id\x18\x03 \x01(\tR\x06nodeId\x12)\n" +
-	"\x04role\x18\x04 \x01(\x0e2\x15.sockcast.v1.NodeRoleR\x04role\x12\x1f\n" +
-	"\vnode_pubkey\x18\x05 \x01(\fR\n" +
-	"nodePubkey\x12+\n" +
-	"\x12issued_at_unix_sec\x18\x06 \x01(\x04R\x0fissuedAtUnixSec\x12-\n" +
-	"\x13expires_at_unix_sec\x18\a \x01(\x04R\x10expiresAtUnixSec\x12%\n" +
-	"\x0euser_signature\x18\b \x01(\fR\ruserSignature\"\xa1\x01\n" +
-	"\bNodeAuth\x12,\n" +
-	"\x05grant\x18\x01 \x01(\v2\x16.sockcast.v1.NodeGrantR\x05grant\x12*\n" +
-	"\x11timestamp_unix_ms\x18\x02 \x01(\x04R\x0ftimestampUnixMs\x12\x14\n" +
-	"\x05nonce\x18\x03 \x01(\fR\x05nonce\x12%\n" +
-	"\x0enode_signature\x18\x04 \x01(\fR\rnodeSignature\"\x8a\x01\n" +
-	"\tPublicKey\x12\x19\n" +
-	"\bkey_blob\x18\x01 \x01(\fR\akeyBlob\x12\x18\n" +
-	"\acomment\x18\x02 \x01(\tR\acomment\x12-\n" +
-	"\x12fingerprint_sha256\x18\x03 \x01(\tR\x11fingerprintSha256\x12\x19\n" +
-	"\bkey_type\x18\x04 \x01(\tR\akeyType\"Q\n" +
-	"\x0fProcessAncestor\x12\x10\n" +
-	"\x03pid\x18\x01 \x01(\rR\x03pid\x12\x12\n" +
-	"\x04comm\x18\x02 \x01(\tR\x04comm\x12\x18\n" +
-	"\acmdline\x18\x03 \x01(\tR\acmdline\"\xcc\x01\n" +
-	"\x0eProcessContext\x12\x1a\n" +
-	"\bhostname\x18\x01 \x01(\tR\bhostname\x12\x10\n" +
-	"\x03uid\x18\x02 \x01(\rR\x03uid\x12\x10\n" +
-	"\x03pid\x18\x03 \x01(\rR\x03pid\x12\x12\n" +
-	"\x04comm\x18\x04 \x01(\tR\x04comm\x12\x18\n" +
-	"\acmdline\x18\x05 \x01(\tR\acmdline\x12\x10\n" +
-	"\x03cwd\x18\x06 \x01(\tR\x03cwd\x12:\n" +
-	"\tancestors\x18\a \x03(\v2\x1c.sockcast.v1.ProcessAncestorR\tancestors\"\xd6\x01\n" +
-	"\x0eSshAuthContext\x12.\n" +
-	"\x13is_userauth_request\x18\x01 \x01(\bR\x11isUserauthRequest\x12'\n" +
-	"\x0ftarget_username\x18\x02 \x01(\tR\x0etargetUsername\x12!\n" +
-	"\fservice_name\x18\x03 \x01(\tR\vserviceName\x12)\n" +
-	"\x10pubkey_algorithm\x18\x04 \x01(\tR\x0fpubkeyAlgorithm\x12\x1d\n" +
-	"\n" +
-	"session_id\x18\x05 \x01(\fR\tsessionId\"A\n" +
-	"\x14GetIdentitiesRequest\x12)\n" +
-	"\x04auth\x18\x01 \x01(\v2\x15.sockcast.v1.NodeAuthR\x04auth\"C\n" +
-	"\x15GetIdentitiesResponse\x12*\n" +
-	"\x04keys\x18\x01 \x03(\v2\x16.sockcast.v1.PublicKeyR\x04keys\"\xb7\x03\n" +
-	"\vSignRequest\x12\x1d\n" +
-	"\n" +
-	"request_id\x18\x01 \x01(\tR\trequestId\x12*\n" +
-	"\x11timestamp_unix_ms\x18\x02 \x01(\x04R\x0ftimestampUnixMs\x12\x19\n" +
-	"\bkey_blob\x18\x03 \x01(\fR\akeyBlob\x12\x12\n" +
-	"\x04data\x18\x04 \x01(\fR\x04data\x12\x14\n" +
-	"\x05flags\x18\x05 \x01(\rR\x05flags\x12D\n" +
-	"\x0fprocess_context\x18\x06 \x01(\v2\x1b.sockcast.v1.ProcessContextR\x0eprocessContext\x12E\n" +
-	"\x10ssh_auth_context\x18\a \x01(\v2\x1b.sockcast.v1.SshAuthContextR\x0esshAuthContext\x127\n" +
-	"\vrelay_grant\x18\b \x01(\v2\x16.sockcast.v1.NodeGrantR\n" +
-	"relayGrant\x12'\n" +
-	"\x0frelay_signature\x18\t \x01(\fR\x0erelaySignature\x12)\n" +
-	"\x04auth\x18\n" +
-	" \x01(\v2\x15.sockcast.v1.NodeAuthR\x04auth\"\xc2\x01\n" +
-	"\fSignResponse\x12\x1d\n" +
-	"\n" +
-	"request_id\x18\x01 \x01(\tR\trequestId\x12\x1a\n" +
-	"\bapproved\x18\x02 \x01(\bR\bapproved\x12%\n" +
-	"\x0esignature_blob\x18\x03 \x01(\fR\rsignatureBlob\x12#\n" +
-	"\rerror_message\x18\x04 \x01(\tR\ferrorMessage\x12+\n" +
-	"\x12handled_by_node_id\x18\x05 \x01(\tR\x0fhandledByNodeId\"\xa1\x01\n" +
-	"\x11WorkstationStatus\x12-\n" +
-	"\x13last_input_epoch_ms\x18\x01 \x01(\x04R\x10lastInputEpochMs\x12!\n" +
-	"\fforce_active\x18\x02 \x01(\bR\vforceActive\x12\x0e\n" +
-	"\x02os\x18\x03 \x01(\tR\x02os\x12*\n" +
-	"\x04keys\x18\x04 \x03(\v2\x16.sockcast.v1.PublicKeyR\x04keys\"(\n" +
-	"\aSignAck\x12\x1d\n" +
-	"\n" +
-	"request_id\x18\x01 \x01(\tR\trequestId\"J\n" +
-	"\x11CancelSignRequest\x12\x1d\n" +
-	"\n" +
-	"request_id\x18\x01 \x01(\tR\trequestId\x12\x16\n" +
-	"\x06reason\x18\x02 \x01(\tR\x06reason\"b\n" +
-	"\x11ZellijSessionInfo\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\x12!\n" +
-	"\fcreated_info\x18\x02 \x01(\tR\vcreatedInfo\x12\x16\n" +
-	"\x06exited\x18\x03 \x01(\bR\x06exited\"\xbc\x01\n" +
-	"\x11RelayZellijStatus\x12\x17\n" +
-	"\anode_id\x18\x01 \x01(\tR\x06nodeId\x12%\n" +
-	"\x0ezellij_enabled\x18\x02 \x01(\bR\rzellijEnabled\x12:\n" +
-	"\bsessions\x18\x03 \x03(\v2\x1e.sockcast.v1.ZellijSessionInfoR\bsessions\x12+\n" +
-	"\x12updated_at_unix_ms\x18\x04 \x01(\x04R\x0fupdatedAtUnixMs\"F\n" +
-	"\x0eZellijHostList\x124\n" +
-	"\x05hosts\x18\x01 \x03(\v2\x1e.sockcast.v1.RelayZellijStatusR\x05hosts\"\xdc\x02\n" +
-	"\x11ZellijTunnelFrame\x12\x1b\n" +
-	"\ttunnel_id\x18\x01 \x01(\tR\btunnelId\x12\"\n" +
-	"\rrelay_node_id\x18\x02 \x01(\tR\vrelayNodeId\x12$\n" +
-	"\x0eclient_node_id\x18\x03 \x01(\tR\fclientNodeId\x12;\n" +
-	"\n" +
-	"frame_type\x18\x04 \x01(\x0e2\x1c.sockcast.v1.ZellijFrameTypeR\tframeType\x12\x18\n" +
-	"\apayload\x18\x05 \x01(\fR\apayload\x12#\n" +
-	"\rerror_message\x18\x06 \x01(\tR\ferrorMessage\x129\n" +
-	"\fsender_grant\x18\a \x01(\v2\x16.sockcast.v1.NodeGrantR\vsenderGrant\x12)\n" +
-	"\x10sender_signature\x18\b \x01(\fR\x0fsenderSignature\"\xeb\x01\n" +
-	"\x12RelayStreamMessage\x12>\n" +
-	"\x0eauth_handshake\x18\x01 \x01(\v2\x15.sockcast.v1.NodeAuthH\x00R\rauthHandshake\x12E\n" +
-	"\rzellij_status\x18\x02 \x01(\v2\x1e.sockcast.v1.RelayZellijStatusH\x00R\fzellijStatus\x12C\n" +
-	"\fzellij_frame\x18\x03 \x01(\v2\x1e.sockcast.v1.ZellijTunnelFrameH\x00R\vzellijFrameB\t\n" +
-	"\apayload\"\xd0\x01\n" +
-	"\x14ServerToRelayMessage\x12;\n" +
-	"\x19server_heartbeat_epoch_ms\x18\x01 \x01(\x04H\x00R\x16serverHeartbeatEpochMs\x12+\n" +
-	"\x10refresh_sessions\x18\x02 \x01(\bH\x00R\x0frefreshSessions\x12C\n" +
-	"\fzellij_frame\x18\x03 \x01(\v2\x1e.sockcast.v1.ZellijTunnelFrameH\x00R\vzellijFrameB\t\n" +
-	"\apayload\"\x88\x03\n" +
-	"\x13ClientStreamMessage\x12>\n" +
-	"\x0eauth_handshake\x18\x01 \x01(\v2\x15.sockcast.v1.NodeAuthH\x00R\rauthHandshake\x128\n" +
-	"\x06status\x18\x02 \x01(\v2\x1e.sockcast.v1.WorkstationStatusH\x00R\x06status\x121\n" +
-	"\bsign_ack\x18\x03 \x01(\v2\x14.sockcast.v1.SignAckH\x00R\asignAck\x12@\n" +
-	"\rsign_response\x18\x04 \x01(\v2\x19.sockcast.v1.SignResponseH\x00R\fsignResponse\x122\n" +
-	"\x14request_zellij_hosts\x18\x05 \x01(\bH\x00R\x12requestZellijHosts\x12C\n" +
-	"\fzellij_frame\x18\x06 \x01(\v2\x1e.sockcast.v1.ZellijTunnelFrameH\x00R\vzellijFrameB\t\n" +
-	"\apayload\"\xfc\x02\n" +
-	"\x13ServerStreamMessage\x12=\n" +
-	"\fsign_request\x18\x01 \x01(\v2\x18.sockcast.v1.SignRequestH\x00R\vsignRequest\x12P\n" +
-	"\x13cancel_sign_request\x18\x02 \x01(\v2\x1e.sockcast.v1.CancelSignRequestH\x00R\x11cancelSignRequest\x12;\n" +
-	"\x19server_heartbeat_epoch_ms\x18\x03 \x01(\x04H\x00R\x16serverHeartbeatEpochMs\x12G\n" +
-	"\x10zellij_host_list\x18\x04 \x01(\v2\x1b.sockcast.v1.ZellijHostListH\x00R\x0ezellijHostList\x12C\n" +
-	"\fzellij_frame\x18\x05 \x01(\v2\x1e.sockcast.v1.ZellijTunnelFrameH\x00R\vzellijFrameB\t\n" +
-	"\apayload*P\n" +
-	"\bNodeRole\x12\x19\n" +
-	"\x15NODE_ROLE_UNSPECIFIED\x10\x00\x12\x13\n" +
-	"\x0fNODE_ROLE_RELAY\x10\x01\x12\x14\n" +
-	"\x10NODE_ROLE_CLIENT\x10\x02*\xcc\x01\n" +
-	"\x0fZellijFrameType\x12!\n" +
-	"\x1dZELLIJ_FRAME_TYPE_UNSPECIFIED\x10\x00\x12\x1a\n" +
-	"\x16ZELLIJ_FRAME_TYPE_OPEN\x10\x01\x12\x1a\n" +
-	"\x16ZELLIJ_FRAME_TYPE_DATA\x10\x02\x12\x1b\n" +
-	"\x17ZELLIJ_FRAME_TYPE_CLOSE\x10\x03\x12\x1f\n" +
-	"\x1bZELLIJ_FRAME_TYPE_P2P_OFFER\x10\x04\x12 \n" +
-	"\x1cZELLIJ_FRAME_TYPE_P2P_ANSWER\x10\x052\xdc\x02\n" +
-	"\x0fSockcastService\x12V\n" +
-	"\rGetIdentities\x12!.sockcast.v1.GetIdentitiesRequest\x1a\".sockcast.v1.GetIdentitiesResponse\x12;\n" +
-	"\x04Sign\x12\x18.sockcast.v1.SignRequest\x1a\x19.sockcast.v1.SignResponse\x12\\\n" +
-	"\x12ConnectWorkstation\x12 .sockcast.v1.ClientStreamMessage\x1a .sockcast.v1.ServerStreamMessage(\x010\x01\x12V\n" +
-	"\fConnectRelay\x12\x1f.sockcast.v1.RelayStreamMessage\x1a!.sockcast.v1.ServerToRelayMessage(\x010\x01BCZAgithub.com/theraphim/sockcast-proto/gen/go/sockcast/v1;sockcastv1b\x06proto3"
+const file_sshcast_v1_sshcast_proto_rawDesc = "\n\x18sshcast/v1/sshcast.proto\x12\nsshcast.v1\"\xac\x02\n\tNodeGrant\x12\x17\n\auser_id\x18\x01 \x01(\tR\x06userId\x12\x1f\n\vuser_pubkey\x18\x02 \x01(\fR\nuserPubkey\x12\x17\n\anode_id\x18\x03 \x01(\tR\x06nodeId\x12(\n\x04role\x18\x04 \x01(\x0e2\x14.sshcast.v1.NodeRoleR\x04role\x12\x1f\n\vnode_pubkey\x18\x05 \x01(\fR\nnodePubkey\x12+\n\x12issued_at_unix_sec\x18\x06 \x01(\x04R\x0fissuedAtUnixSec\x12-\n\x13expires_at_unix_sec\x18\a \x01(\x04R\x10expiresAtUnixSec\x12%\n\x0euser_signature\x18\b \x01(\fR\ruserSignature\"\xa0\x01\n\bNodeAuth\x12+\n\x05grant\x18\x01 \x01(\v2\x15.sshcast.v1.NodeGrantR\x05grant\x12*\n\x11timestamp_unix_ms\x18\x02 \x01(\x04R\x0ftimestampUnixMs\x12\x14\n\x05nonce\x18\x03 \x01(\fR\x05nonce\x12%\n\x0enode_signature\x18\x04 \x01(\fR\rnodeSignature\"\x8a\x01\n\tPublicKey\x12\x19\n\bkey_blob\x18\x01 \x01(\fR\akeyBlob\x12\x18\n\acomment\x18\x02 \x01(\tR\acomment\x12-\n\x12fingerprint_sha256\x18\x03 \x01(\tR\x11fingerprintSha256\x12\x19\n\bkey_type\x18\x04 \x01(\tR\akeyType\"Q\n\x0fProcessAncestor\x12\x10\n\x03pid\x18\x01 \x01(\rR\x03pid\x12\x12\n\x04comm\x18\x02 \x01(\tR\x04comm\x12\x18\n\acmdline\x18\x03 \x01(\tR\acmdline\"\xcb\x01\n\x0eProcessContext\x12\x1a\n\bhostname\x18\x01 \x01(\tR\bhostname\x12\x10\n\x03uid\x18\x02 \x01(\rR\x03uid\x12\x10\n\x03pid\x18\x03 \x01(\rR\x03pid\x12\x12\n\x04comm\x18\x04 \x01(\tR\x04comm\x12\x18\n\acmdline\x18\x05 \x01(\tR\acmdline\x12\x10\n\x03cwd\x18\x06 \x01(\tR\x03cwd\x129\n\tancestors\x18\a \x03(\v2\x1b.sshcast.v1.ProcessAncestorR\tancestors\"\xd6\x01\n\x0eSshAuthContext\x12.\n\x13is_userauth_request\x18\x01 \x01(\bR\x11isUserauthRequest\x12'\n\x0ftarget_username\x18\x02 \x01(\tR\x0etargetUsername\x12!\n\fservice_name\x18\x03 \x01(\tR\vserviceName\x12)\n\x10pubkey_algorithm\x18\x04 \x01(\tR\x0fpubkeyAlgorithm\x12\x1d\n\nsession_id\x18\x05 \x01(\fR\tsessionId\"@\n\x14GetIdentitiesRequest\x12(\n\x04auth\x18\x01 \x01(\v2\x14.sshcast.v1.NodeAuthR\x04auth\"B\n\x15GetIdentitiesResponse\x12)\n\x04keys\x18\x01 \x03(\v2\x15.sshcast.v1.PublicKeyR\x04keys\"\xb3\x03\n\vSignRequest\x12\x1d\n\nrequest_id\x18\x01 \x01(\tR\trequestId\x12*\n\x11timestamp_unix_ms\x18\x02 \x01(\x04R\x0ftimestampUnixMs\x12\x19\n\bkey_blob\x18\x03 \x01(\fR\akeyBlob\x12\x12\n\x04data\x18\x04 \x01(\fR\x04data\x12\x14\n\x05flags\x18\x05 \x01(\rR\x05flags\x12C\n\x0fprocess_context\x18\x06 \x01(\v2\x1a.sshcast.v1.ProcessContextR\x0eprocessContext\x12D\n\x10ssh_auth_context\x18\a \x01(\v2\x1a.sshcast.v1.SshAuthContextR\x0esshAuthContext\x126\n\vrelay_grant\x18\b \x01(\v2\x15.sshcast.v1.NodeGrantR\nrelayGrant\x12'\n\x0frelay_signature\x18\t \x01(\fR\x0erelaySignature\x12(\n\x04auth\x18\n \x01(\v2\x14.sshcast.v1.NodeAuthR\x04auth\"\xc2\x01\n\fSignResponse\x12\x1d\n\nrequest_id\x18\x01 \x01(\tR\trequestId\x12\x1a\n\bapproved\x18\x02 \x01(\bR\bapproved\x12%\n\x0esignature_blob\x18\x03 \x01(\fR\rsignatureBlob\x12#\n\rerror_message\x18\x04 \x01(\tR\ferrorMessage\x12+\n\x12handled_by_node_id\x18\x05 \x01(\tR\x0fhandledByNodeId\"\xa0\x01\n\x11WorkstationStatus\x12-\n\x13last_input_epoch_ms\x18\x01 \x01(\x04R\x10lastInputEpochMs\x12!\n\fforce_active\x18\x02 \x01(\bR\vforceActive\x12\x0e\n\x02os\x18\x03 \x01(\tR\x02os\x12)\n\x04keys\x18\x04 \x03(\v2\x15.sshcast.v1.PublicKeyR\x04keys\"(\n\aSignAck\x12\x1d\n\nrequest_id\x18\x01 \x01(\tR\trequestId\"J\n\x11CancelSignRequest\x12\x1d\n\nrequest_id\x18\x01 \x01(\tR\trequestId\x12\x16\n\x06reason\x18\x02 \x01(\tR\x06reason\"b\n\x11ZellijSessionInfo\x12\x12\n\x04name\x18\x01 \x01(\tR\x04name\x12!\n\fcreated_info\x18\x02 \x01(\tR\vcreatedInfo\x12\x16\n\x06exited\x18\x03 \x01(\bR\x06exited\"\xbb\x01\n\x11RelayZellijStatus\x12\x17\n\anode_id\x18\x01 \x01(\tR\x06nodeId\x12%\n\x0ezellij_enabled\x18\x02 \x01(\bR\rzellijEnabled\x129\n\bsessions\x18\x03 \x03(\v2\x1d.sshcast.v1.ZellijSessionInfoR\bsessions\x12+\n\x12updated_at_unix_ms\x18\x04 \x01(\x04R\x0fupdatedAtUnixMs\"E\n\x0eZellijHostList\x123\n\x05hosts\x18\x01 \x03(\v2\x1d.sshcast.v1.RelayZellijStatusR\x05hosts\"\xda\x02\n\x11ZellijTunnelFrame\x12\x1b\n\ttunnel_id\x18\x01 \x01(\tR\btunnelId\x12\"\n\rrelay_node_id\x18\x02 \x01(\tR\vrelayNodeId\x12$\n\x0eclient_node_id\x18\x03 \x01(\tR\fclientNodeId\x12:\n\nframe_type\x18\x04 \x01(\x0e2\x1b.sshcast.v1.ZellijFrameTypeR\tframeType\x12\x18\n\apayload\x18\x05 \x01(\fR\apayload\x12#\n\rerror_message\x18\x06 \x01(\tR\ferrorMessage\x128\n\fsender_grant\x18\a \x01(\v2\x15.sshcast.v1.NodeGrantR\vsenderGrant\x12)\n\x10sender_signature\x18\b \x01(\fR\x0fsenderSignature\"\xe8\x01\n\x12RelayStreamMessage\x12=\n\x0eauth_handshake\x18\x01 \x01(\v2\x14.sshcast.v1.NodeAuthH\x00R\rauthHandshake\x12D\n\rzellij_status\x18\x02 \x01(\v2\x1d.sshcast.v1.RelayZellijStatusH\x00R\fzellijStatus\x12B\n\fzellij_frame\x18\x03 \x01(\v2\x1d.sshcast.v1.ZellijTunnelFrameH\x00R\vzellijFrameB\t\n\apayload\"\xcf\x01\n\x14ServerToRelayMessage\x12;\n\x19server_heartbeat_epoch_ms\x18\x01 \x01(\x04H\x00R\x16serverHeartbeatEpochMs\x12+\n\x10refresh_sessions\x18\x02 \x01(\bH\x00R\x0frefreshSessions\x12B\n\fzellij_frame\x18\x03 \x01(\v2\x1d.sshcast.v1.ZellijTunnelFrameH\x00R\vzellijFrameB\t\n\apayload\"\x83\x03\n\x13ClientStreamMessage\x12=\n\x0eauth_handshake\x18\x01 \x01(\v2\x14.sshcast.v1.NodeAuthH\x00R\rauthHandshake\x127\n\x06status\x18\x02 \x01(\v2\x1d.sshcast.v1.WorkstationStatusH\x00R\x06status\x120\n\bsign_ack\x18\x03 \x01(\v2\x13.sshcast.v1.SignAckH\x00R\asignAck\x12?\n\rsign_response\x18\x04 \x01(\v2\x18.sshcast.v1.SignResponseH\x00R\fsignResponse\x122\n\x14request_zellij_hosts\x18\x05 \x01(\bH\x00R\x12requestZellijHosts\x12B\n\fzellij_frame\x18\x06 \x01(\v2\x1d.sshcast.v1.ZellijTunnelFrameH\x00R\vzellijFrameB\t\n\apayload\"\xf8\x02\n\x13ServerStreamMessage\x12<\n\fsign_request\x18\x01 \x01(\v2\x17.sshcast.v1.SignRequestH\x00R\vsignRequest\x12O\n\x13cancel_sign_request\x18\x02 \x01(\v2\x1d.sshcast.v1.CancelSignRequestH\x00R\x11cancelSignRequest\x12;\n\x19server_heartbeat_epoch_ms\x18\x03 \x01(\x04H\x00R\x16serverHeartbeatEpochMs\x12F\n\x10zellij_host_list\x18\x04 \x01(\v2\x1a.sshcast.v1.ZellijHostListH\x00R\x0ezellijHostList\x12B\n\fzellij_frame\x18\x05 \x01(\v2\x1d.sshcast.v1.ZellijTunnelFrameH\x00R\vzellijFrameB\t\n\apayload*P\n\bNodeRole\x12\x19\n\x15NODE_ROLE_UNSPECIFIED\x10\x00\x12\x13\n\x0fNODE_ROLE_RELAY\x10\x01\x12\x14\n\x10NODE_ROLE_CLIENT\x10\x02*\xcc\x01\n\x0fZellijFrameType\x12!\n\x1dZELLIJ_FRAME_TYPE_UNSPECIFIED\x10\x00\x12\x1a\n\x16ZELLIJ_FRAME_TYPE_OPEN\x10\x01\x12\x1a\n\x16ZELLIJ_FRAME_TYPE_DATA\x10\x02\x12\x1b\n\x17ZELLIJ_FRAME_TYPE_CLOSE\x10\x03\x12\x1f\n\x1bZELLIJ_FRAME_TYPE_P2P_OFFER\x10\x04\x12 \n\x1cZELLIJ_FRAME_TYPE_P2P_ANSWER\x10\x052\xd3\x02\n\x0eSshcastService\x12T\n\rGetIdentities\x12 .sshcast.v1.GetIdentitiesRequest\x1a!.sshcast.v1.GetIdentitiesResponse\x129\n\x04Sign\x12\x17.sshcast.v1.SignRequest\x1a\x18.sshcast.v1.SignResponse\x12Z\n\x12ConnectWorkstation\x12\x1f.sshcast.v1.ClientStreamMessage\x1a\x1f.sshcast.v1.ServerStreamMessage(\x010\x01\x12T\n\fConnectRelay\x12\x1e.sshcast.v1.RelayStreamMessage\x1a .sshcast.v1.ServerToRelayMessage(\x010\x01B9Z7stingr.net/go/sshcast-proto/gen/go/sshcast/v1;sshcastv1b\x06proto3"
 
 var (
-	file_sockcast_v1_sockcast_proto_rawDescOnce sync.Once
-	file_sockcast_v1_sockcast_proto_rawDescData []byte
+	file_sshcast_v1_sshcast_proto_rawDescOnce sync.Once
+	file_sshcast_v1_sshcast_proto_rawDescData []byte
 )
 
-func file_sockcast_v1_sockcast_proto_rawDescGZIP() []byte {
-	file_sockcast_v1_sockcast_proto_rawDescOnce.Do(func() {
-		file_sockcast_v1_sockcast_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_sockcast_v1_sockcast_proto_rawDesc), len(file_sockcast_v1_sockcast_proto_rawDesc)))
+func file_sshcast_v1_sshcast_proto_rawDescGZIP() []byte {
+	file_sshcast_v1_sshcast_proto_rawDescOnce.Do(func() {
+		file_sshcast_v1_sshcast_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_sshcast_v1_sshcast_proto_rawDesc), len(file_sshcast_v1_sshcast_proto_rawDesc)))
 	})
-	return file_sockcast_v1_sockcast_proto_rawDescData
+	return file_sshcast_v1_sshcast_proto_rawDescData
 }
 
-var file_sockcast_v1_sockcast_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_sockcast_v1_sockcast_proto_msgTypes = make([]protoimpl.MessageInfo, 21)
-var file_sockcast_v1_sockcast_proto_goTypes = []any{
-	(NodeRole)(0),                 // 0: sockcast.v1.NodeRole
-	(ZellijFrameType)(0),          // 1: sockcast.v1.ZellijFrameType
-	(*NodeGrant)(nil),             // 2: sockcast.v1.NodeGrant
-	(*NodeAuth)(nil),              // 3: sockcast.v1.NodeAuth
-	(*PublicKey)(nil),             // 4: sockcast.v1.PublicKey
-	(*ProcessAncestor)(nil),       // 5: sockcast.v1.ProcessAncestor
-	(*ProcessContext)(nil),        // 6: sockcast.v1.ProcessContext
-	(*SshAuthContext)(nil),        // 7: sockcast.v1.SshAuthContext
-	(*GetIdentitiesRequest)(nil),  // 8: sockcast.v1.GetIdentitiesRequest
-	(*GetIdentitiesResponse)(nil), // 9: sockcast.v1.GetIdentitiesResponse
-	(*SignRequest)(nil),           // 10: sockcast.v1.SignRequest
-	(*SignResponse)(nil),          // 11: sockcast.v1.SignResponse
-	(*WorkstationStatus)(nil),     // 12: sockcast.v1.WorkstationStatus
-	(*SignAck)(nil),               // 13: sockcast.v1.SignAck
-	(*CancelSignRequest)(nil),     // 14: sockcast.v1.CancelSignRequest
-	(*ZellijSessionInfo)(nil),     // 15: sockcast.v1.ZellijSessionInfo
-	(*RelayZellijStatus)(nil),     // 16: sockcast.v1.RelayZellijStatus
-	(*ZellijHostList)(nil),        // 17: sockcast.v1.ZellijHostList
-	(*ZellijTunnelFrame)(nil),     // 18: sockcast.v1.ZellijTunnelFrame
-	(*RelayStreamMessage)(nil),    // 19: sockcast.v1.RelayStreamMessage
-	(*ServerToRelayMessage)(nil),  // 20: sockcast.v1.ServerToRelayMessage
-	(*ClientStreamMessage)(nil),   // 21: sockcast.v1.ClientStreamMessage
-	(*ServerStreamMessage)(nil),   // 22: sockcast.v1.ServerStreamMessage
+var file_sshcast_v1_sshcast_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
+var file_sshcast_v1_sshcast_proto_msgTypes = make([]protoimpl.MessageInfo, 21)
+var file_sshcast_v1_sshcast_proto_goTypes = []any{
+	(NodeRole)(0),                 // 0: sshcast.v1.NodeRole
+	(ZellijFrameType)(0),          // 1: sshcast.v1.ZellijFrameType
+	(*NodeGrant)(nil),             // 2: sshcast.v1.NodeGrant
+	(*NodeAuth)(nil),              // 3: sshcast.v1.NodeAuth
+	(*PublicKey)(nil),             // 4: sshcast.v1.PublicKey
+	(*ProcessAncestor)(nil),       // 5: sshcast.v1.ProcessAncestor
+	(*ProcessContext)(nil),        // 6: sshcast.v1.ProcessContext
+	(*SshAuthContext)(nil),        // 7: sshcast.v1.SshAuthContext
+	(*GetIdentitiesRequest)(nil),  // 8: sshcast.v1.GetIdentitiesRequest
+	(*GetIdentitiesResponse)(nil), // 9: sshcast.v1.GetIdentitiesResponse
+	(*SignRequest)(nil),           // 10: sshcast.v1.SignRequest
+	(*SignResponse)(nil),          // 11: sshcast.v1.SignResponse
+	(*WorkstationStatus)(nil),     // 12: sshcast.v1.WorkstationStatus
+	(*SignAck)(nil),               // 13: sshcast.v1.SignAck
+	(*CancelSignRequest)(nil),     // 14: sshcast.v1.CancelSignRequest
+	(*ZellijSessionInfo)(nil),     // 15: sshcast.v1.ZellijSessionInfo
+	(*RelayZellijStatus)(nil),     // 16: sshcast.v1.RelayZellijStatus
+	(*ZellijHostList)(nil),        // 17: sshcast.v1.ZellijHostList
+	(*ZellijTunnelFrame)(nil),     // 18: sshcast.v1.ZellijTunnelFrame
+	(*RelayStreamMessage)(nil),    // 19: sshcast.v1.RelayStreamMessage
+	(*ServerToRelayMessage)(nil),  // 20: sshcast.v1.ServerToRelayMessage
+	(*ClientStreamMessage)(nil),   // 21: sshcast.v1.ClientStreamMessage
+	(*ServerStreamMessage)(nil),   // 22: sshcast.v1.ServerStreamMessage
 }
-var file_sockcast_v1_sockcast_proto_depIdxs = []int32{
-	0,  // 0: sockcast.v1.NodeGrant.role:type_name -> sockcast.v1.NodeRole
-	2,  // 1: sockcast.v1.NodeAuth.grant:type_name -> sockcast.v1.NodeGrant
-	5,  // 2: sockcast.v1.ProcessContext.ancestors:type_name -> sockcast.v1.ProcessAncestor
-	3,  // 3: sockcast.v1.GetIdentitiesRequest.auth:type_name -> sockcast.v1.NodeAuth
-	4,  // 4: sockcast.v1.GetIdentitiesResponse.keys:type_name -> sockcast.v1.PublicKey
-	6,  // 5: sockcast.v1.SignRequest.process_context:type_name -> sockcast.v1.ProcessContext
-	7,  // 6: sockcast.v1.SignRequest.ssh_auth_context:type_name -> sockcast.v1.SshAuthContext
-	2,  // 7: sockcast.v1.SignRequest.relay_grant:type_name -> sockcast.v1.NodeGrant
-	3,  // 8: sockcast.v1.SignRequest.auth:type_name -> sockcast.v1.NodeAuth
-	4,  // 9: sockcast.v1.WorkstationStatus.keys:type_name -> sockcast.v1.PublicKey
-	15, // 10: sockcast.v1.RelayZellijStatus.sessions:type_name -> sockcast.v1.ZellijSessionInfo
-	16, // 11: sockcast.v1.ZellijHostList.hosts:type_name -> sockcast.v1.RelayZellijStatus
-	1,  // 12: sockcast.v1.ZellijTunnelFrame.frame_type:type_name -> sockcast.v1.ZellijFrameType
-	2,  // 13: sockcast.v1.ZellijTunnelFrame.sender_grant:type_name -> sockcast.v1.NodeGrant
-	3,  // 14: sockcast.v1.RelayStreamMessage.auth_handshake:type_name -> sockcast.v1.NodeAuth
-	16, // 15: sockcast.v1.RelayStreamMessage.zellij_status:type_name -> sockcast.v1.RelayZellijStatus
-	18, // 16: sockcast.v1.RelayStreamMessage.zellij_frame:type_name -> sockcast.v1.ZellijTunnelFrame
-	18, // 17: sockcast.v1.ServerToRelayMessage.zellij_frame:type_name -> sockcast.v1.ZellijTunnelFrame
-	3,  // 18: sockcast.v1.ClientStreamMessage.auth_handshake:type_name -> sockcast.v1.NodeAuth
-	12, // 19: sockcast.v1.ClientStreamMessage.status:type_name -> sockcast.v1.WorkstationStatus
-	13, // 20: sockcast.v1.ClientStreamMessage.sign_ack:type_name -> sockcast.v1.SignAck
-	11, // 21: sockcast.v1.ClientStreamMessage.sign_response:type_name -> sockcast.v1.SignResponse
-	18, // 22: sockcast.v1.ClientStreamMessage.zellij_frame:type_name -> sockcast.v1.ZellijTunnelFrame
-	10, // 23: sockcast.v1.ServerStreamMessage.sign_request:type_name -> sockcast.v1.SignRequest
-	14, // 24: sockcast.v1.ServerStreamMessage.cancel_sign_request:type_name -> sockcast.v1.CancelSignRequest
-	17, // 25: sockcast.v1.ServerStreamMessage.zellij_host_list:type_name -> sockcast.v1.ZellijHostList
-	18, // 26: sockcast.v1.ServerStreamMessage.zellij_frame:type_name -> sockcast.v1.ZellijTunnelFrame
-	8,  // 27: sockcast.v1.SockcastService.GetIdentities:input_type -> sockcast.v1.GetIdentitiesRequest
-	10, // 28: sockcast.v1.SockcastService.Sign:input_type -> sockcast.v1.SignRequest
-	21, // 29: sockcast.v1.SockcastService.ConnectWorkstation:input_type -> sockcast.v1.ClientStreamMessage
-	19, // 30: sockcast.v1.SockcastService.ConnectRelay:input_type -> sockcast.v1.RelayStreamMessage
-	9,  // 31: sockcast.v1.SockcastService.GetIdentities:output_type -> sockcast.v1.GetIdentitiesResponse
-	11, // 32: sockcast.v1.SockcastService.Sign:output_type -> sockcast.v1.SignResponse
-	22, // 33: sockcast.v1.SockcastService.ConnectWorkstation:output_type -> sockcast.v1.ServerStreamMessage
-	20, // 34: sockcast.v1.SockcastService.ConnectRelay:output_type -> sockcast.v1.ServerToRelayMessage
+var file_sshcast_v1_sshcast_proto_depIdxs = []int32{
+	0,  // 0: sshcast.v1.NodeGrant.role:type_name -> sshcast.v1.NodeRole
+	2,  // 1: sshcast.v1.NodeAuth.grant:type_name -> sshcast.v1.NodeGrant
+	5,  // 2: sshcast.v1.ProcessContext.ancestors:type_name -> sshcast.v1.ProcessAncestor
+	3,  // 3: sshcast.v1.GetIdentitiesRequest.auth:type_name -> sshcast.v1.NodeAuth
+	4,  // 4: sshcast.v1.GetIdentitiesResponse.keys:type_name -> sshcast.v1.PublicKey
+	6,  // 5: sshcast.v1.SignRequest.process_context:type_name -> sshcast.v1.ProcessContext
+	7,  // 6: sshcast.v1.SignRequest.ssh_auth_context:type_name -> sshcast.v1.SshAuthContext
+	2,  // 7: sshcast.v1.SignRequest.relay_grant:type_name -> sshcast.v1.NodeGrant
+	3,  // 8: sshcast.v1.SignRequest.auth:type_name -> sshcast.v1.NodeAuth
+	4,  // 9: sshcast.v1.WorkstationStatus.keys:type_name -> sshcast.v1.PublicKey
+	15, // 10: sshcast.v1.RelayZellijStatus.sessions:type_name -> sshcast.v1.ZellijSessionInfo
+	16, // 11: sshcast.v1.ZellijHostList.hosts:type_name -> sshcast.v1.RelayZellijStatus
+	1,  // 12: sshcast.v1.ZellijTunnelFrame.frame_type:type_name -> sshcast.v1.ZellijFrameType
+	2,  // 13: sshcast.v1.ZellijTunnelFrame.sender_grant:type_name -> sshcast.v1.NodeGrant
+	3,  // 14: sshcast.v1.RelayStreamMessage.auth_handshake:type_name -> sshcast.v1.NodeAuth
+	16, // 15: sshcast.v1.RelayStreamMessage.zellij_status:type_name -> sshcast.v1.RelayZellijStatus
+	18, // 16: sshcast.v1.RelayStreamMessage.zellij_frame:type_name -> sshcast.v1.ZellijTunnelFrame
+	18, // 17: sshcast.v1.ServerToRelayMessage.zellij_frame:type_name -> sshcast.v1.ZellijTunnelFrame
+	3,  // 18: sshcast.v1.ClientStreamMessage.auth_handshake:type_name -> sshcast.v1.NodeAuth
+	12, // 19: sshcast.v1.ClientStreamMessage.status:type_name -> sshcast.v1.WorkstationStatus
+	13, // 20: sshcast.v1.ClientStreamMessage.sign_ack:type_name -> sshcast.v1.SignAck
+	11, // 21: sshcast.v1.ClientStreamMessage.sign_response:type_name -> sshcast.v1.SignResponse
+	18, // 22: sshcast.v1.ClientStreamMessage.zellij_frame:type_name -> sshcast.v1.ZellijTunnelFrame
+	10, // 23: sshcast.v1.ServerStreamMessage.sign_request:type_name -> sshcast.v1.SignRequest
+	14, // 24: sshcast.v1.ServerStreamMessage.cancel_sign_request:type_name -> sshcast.v1.CancelSignRequest
+	17, // 25: sshcast.v1.ServerStreamMessage.zellij_host_list:type_name -> sshcast.v1.ZellijHostList
+	18, // 26: sshcast.v1.ServerStreamMessage.zellij_frame:type_name -> sshcast.v1.ZellijTunnelFrame
+	8,  // 27: sshcast.v1.SshcastService.GetIdentities:input_type -> sshcast.v1.GetIdentitiesRequest
+	10, // 28: sshcast.v1.SshcastService.Sign:input_type -> sshcast.v1.SignRequest
+	21, // 29: sshcast.v1.SshcastService.ConnectWorkstation:input_type -> sshcast.v1.ClientStreamMessage
+	19, // 30: sshcast.v1.SshcastService.ConnectRelay:input_type -> sshcast.v1.RelayStreamMessage
+	9,  // 31: sshcast.v1.SshcastService.GetIdentities:output_type -> sshcast.v1.GetIdentitiesResponse
+	11, // 32: sshcast.v1.SshcastService.Sign:output_type -> sshcast.v1.SignResponse
+	22, // 33: sshcast.v1.SshcastService.ConnectWorkstation:output_type -> sshcast.v1.ServerStreamMessage
+	20, // 34: sshcast.v1.SshcastService.ConnectRelay:output_type -> sshcast.v1.ServerToRelayMessage
 	31, // [31:35] is the sub-list for method output_type
 	27, // [27:31] is the sub-list for method input_type
 	27, // [27:27] is the sub-list for extension type_name
@@ -2007,22 +1866,22 @@ var file_sockcast_v1_sockcast_proto_depIdxs = []int32{
 	0,  // [0:27] is the sub-list for field type_name
 }
 
-func init() { file_sockcast_v1_sockcast_proto_init() }
-func file_sockcast_v1_sockcast_proto_init() {
-	if File_sockcast_v1_sockcast_proto != nil {
+func init() { file_sshcast_v1_sshcast_proto_init() }
+func file_sshcast_v1_sshcast_proto_init() {
+	if File_sshcast_v1_sshcast_proto != nil {
 		return
 	}
-	file_sockcast_v1_sockcast_proto_msgTypes[17].OneofWrappers = []any{
+	file_sshcast_v1_sshcast_proto_msgTypes[17].OneofWrappers = []any{
 		(*RelayStreamMessage_AuthHandshake)(nil),
 		(*RelayStreamMessage_ZellijStatus)(nil),
 		(*RelayStreamMessage_ZellijFrame)(nil),
 	}
-	file_sockcast_v1_sockcast_proto_msgTypes[18].OneofWrappers = []any{
+	file_sshcast_v1_sshcast_proto_msgTypes[18].OneofWrappers = []any{
 		(*ServerToRelayMessage_ServerHeartbeatEpochMs)(nil),
 		(*ServerToRelayMessage_RefreshSessions)(nil),
 		(*ServerToRelayMessage_ZellijFrame)(nil),
 	}
-	file_sockcast_v1_sockcast_proto_msgTypes[19].OneofWrappers = []any{
+	file_sshcast_v1_sshcast_proto_msgTypes[19].OneofWrappers = []any{
 		(*ClientStreamMessage_AuthHandshake)(nil),
 		(*ClientStreamMessage_Status)(nil),
 		(*ClientStreamMessage_SignAck)(nil),
@@ -2030,7 +1889,7 @@ func file_sockcast_v1_sockcast_proto_init() {
 		(*ClientStreamMessage_RequestZellijHosts)(nil),
 		(*ClientStreamMessage_ZellijFrame)(nil),
 	}
-	file_sockcast_v1_sockcast_proto_msgTypes[20].OneofWrappers = []any{
+	file_sshcast_v1_sshcast_proto_msgTypes[20].OneofWrappers = []any{
 		(*ServerStreamMessage_SignRequest)(nil),
 		(*ServerStreamMessage_CancelSignRequest)(nil),
 		(*ServerStreamMessage_ServerHeartbeatEpochMs)(nil),
@@ -2041,18 +1900,18 @@ func file_sockcast_v1_sockcast_proto_init() {
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_sockcast_v1_sockcast_proto_rawDesc), len(file_sockcast_v1_sockcast_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_sshcast_v1_sshcast_proto_rawDesc), len(file_sshcast_v1_sshcast_proto_rawDesc)),
 			NumEnums:      2,
 			NumMessages:   21,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
-		GoTypes:           file_sockcast_v1_sockcast_proto_goTypes,
-		DependencyIndexes: file_sockcast_v1_sockcast_proto_depIdxs,
-		EnumInfos:         file_sockcast_v1_sockcast_proto_enumTypes,
-		MessageInfos:      file_sockcast_v1_sockcast_proto_msgTypes,
+		GoTypes:           file_sshcast_v1_sshcast_proto_goTypes,
+		DependencyIndexes: file_sshcast_v1_sshcast_proto_depIdxs,
+		EnumInfos:         file_sshcast_v1_sshcast_proto_enumTypes,
+		MessageInfos:      file_sshcast_v1_sshcast_proto_msgTypes,
 	}.Build()
-	File_sockcast_v1_sockcast_proto = out.File
-	file_sockcast_v1_sockcast_proto_goTypes = nil
-	file_sockcast_v1_sockcast_proto_depIdxs = nil
+	File_sshcast_v1_sshcast_proto = out.File
+	file_sshcast_v1_sshcast_proto_goTypes = nil
+	file_sshcast_v1_sshcast_proto_depIdxs = nil
 }

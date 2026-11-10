@@ -5,7 +5,7 @@ import (
 	"crypto/ed25519"
 	"testing"
 
-	sockcastv1 "github.com/theraphim/sockcast-proto/gen/go/sockcast/v1"
+	sshcastv1 "stingr.net/go/sshcast-proto/gen/go/sshcast/v1"
 )
 
 func deterministicKeypair(seedByte byte) (ed25519.PublicKey, ed25519.PrivateKey) {
@@ -18,11 +18,11 @@ func TestNodeGrantAuthAndSignRequest(t *testing.T) {
 	userPub, userPriv := deterministicKeypair(0x11)
 	relayPub, relayPriv := deterministicKeypair(0x22)
 
-	grant := &sockcastv1.NodeGrant{
+	grant := &sshcastv1.NodeGrant{
 		UserId:           DeriveUserID(userPub),
 		UserPubkey:       userPub,
 		NodeId:           "server-x.infra.local",
-		Role:             sockcastv1.NodeRole_NODE_ROLE_RELAY,
+		Role:             sshcastv1.NodeRole_NODE_ROLE_RELAY,
 		NodePubkey:       relayPub,
 		IssuedAtUnixSec:  1700000000,
 		ExpiresAtUnixSec: 1800000000,
@@ -37,7 +37,7 @@ func TestNodeGrantAuthAndSignRequest(t *testing.T) {
 		t.Fatalf("expected ErrGrantExpired, got %v", err)
 	}
 
-	authMsg := &sockcastv1.NodeAuth{
+	authMsg := &sshcastv1.NodeAuth{
 		Grant:           grant,
 		TimestampUnixMs: 1750000000000,
 		Nonce:           []byte{1, 2, 3, 4, 5, 6, 7, 8},
@@ -45,29 +45,29 @@ func TestNodeGrantAuthAndSignRequest(t *testing.T) {
 	if err := SignNodeAuth(authMsg, relayPriv); err != nil {
 		t.Fatalf("SignNodeAuth failed: %v", err)
 	}
-	if err := VerifyNodeAuth(authMsg, sockcastv1.NodeRole_NODE_ROLE_RELAY, 1750000010000, DefaultMaxClockSkewMs); err != nil {
+	if err := VerifyNodeAuth(authMsg, sshcastv1.NodeRole_NODE_ROLE_RELAY, 1750000010000, DefaultMaxClockSkewMs); err != nil {
 		t.Fatalf("VerifyNodeAuth failed: %v", err)
 	}
 
-	req := &sockcastv1.SignRequest{
+	req := &sshcastv1.SignRequest{
 		RequestId:       "req-001",
 		TimestampUnixMs: 1750000000000,
 		KeyBlob:         []byte("ssh-ed25519-pubkey-blob"),
 		Data:            []byte("challenge-payload"),
 		Flags:           0,
-		ProcessContext: &sockcastv1.ProcessContext{
+		ProcessContext: &sshcastv1.ProcessContext{
 			Hostname: "server-x.infra.local",
 			Uid:      1000,
 			Pid:      41892,
 			Comm:     "ssh",
 			Cmdline:  "ssh server-y scp -t /tmp",
 			Cwd:      "/home/pavel/rpmbuild",
-			Ancestors: []*sockcastv1.ProcessAncestor{
+			Ancestors: []*sshcastv1.ProcessAncestor{
 				{Pid: 41890, Comm: "scp", Cmdline: "scp pkg.rpm server-y:/tmp"},
 				{Pid: 1890, Comm: "zsh", Cmdline: "-zsh"},
 			},
 		},
-		SshAuthContext: &sockcastv1.SshAuthContext{
+		SshAuthContext: &sshcastv1.SshAuthContext{
 			IsUserauthRequest: true,
 			TargetUsername:    "pavel",
 			ServiceName:       "ssh-connection",

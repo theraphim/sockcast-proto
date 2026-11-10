@@ -1,10 +1,10 @@
-# `sockcast-proto`
+# `sshcast-proto`
 
-Shared Protobuf wire protocol (`sockcast.v1`), Ed25519 zero-trust application cryptography (`NodeGrant`, `NodeAuth`, end-to-end signed `SignRequest`), RFC 4252 `SSH_MSG_USERAUTH_REQUEST` payload parser, and compact `sc1_<base64>` enrollment bundle codec for the **Sockcast** Roaming SSH Agent architecture.
+Shared Protobuf wire protocol (`sshcast.v1`), Ed25519 zero-trust application cryptography (`NodeGrant`, `NodeAuth`, end-to-end signed `SignRequest`), RFC 4252 `SSH_MSG_USERAUTH_REQUEST` payload parser, and compact `sc1_<base64>` enrollment bundle codec for the **Sshcast** Roaming SSH Agent architecture.
 
 Exported simultaneously as:
-1. **Rust crate** (`sockcast-proto`) used by [`sockcast-relay`](https://github.com/theraphim/sockcast-relay) and [`sockcast-client`](https://github.com/theraphim/sockcast-client).
-2. **Go module** (`github.com/theraphim/sockcast-proto`) used by [`sockcast-server`](https://github.com/theraphim/sockcast-server).
+1. **Rust crate** (`sshcast-proto`) used by [`sshcast-relay`](https://github.com/theraphim/sshcast-relay) and [`sshcast-client`](https://github.com/theraphim/sshcast-client).
+2. **Go module** (`github.com/theraphim/sshcast-proto`) used by [`sshcast-server`](https://github.com/theraphim/sshcast-server).
 
 ## Features
 - **Zero-Trust Edge Cryptography (`src/crypto.rs` & `pkg/auth/auth.go`):**

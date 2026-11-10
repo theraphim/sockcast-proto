@@ -1,5 +1,5 @@
 pub mod v1 {
-    include!("pb/sockcast.v1.rs");
+    include!("pb/sshcast.v1.rs");
 }
 
 pub mod bundle;
@@ -113,15 +113,15 @@ mod tests {
         // Verify byte-for-byte cross-language parity with Go pkg/auth
         assert_eq!(
             hex::encode(&grant.user_signature),
-            "536e3952d407c3e13f6dba3fc5802348fd3fba43e2205515276ffff1d0397b053df4bf7e311dfabe50cbf79345a5dcce453a1bcd05cfa4888402eda67cc73b0a"
+            "4119f0a42f08f67f4d33e95dbe69ad8cf2515d2b5a730465a781dfa26148b5e73367aa9b811ab1cc79e699ce6a079108f3f118c9fd30027a26fa811bcef5c40f"
         );
         assert_eq!(
             hex::encode(&req.auth.as_ref().unwrap().node_signature),
-            "9402787885b7cc02998ae7b159b361bcaf226d4f41c7c125ba6e6d6d2a94505d921b546fe6979b653006722d300ad10ccb3d038fce8b95a8fddc2a4ea326dd03"
+            "d841770dc47940692537f2185d0a28b84768086a99dba89af2b64a59ec6772a4baee9e65d918fc2cfe83c8b97054d0c4b4ca46b4ffa6b2452aad96f1ab52cd07"
         );
         assert_eq!(
             hex::encode(&req.relay_signature),
-            "6cdcb10b935a6516d377723485df697f87a3f3e7271426fee8443678d6c4ca61e4dbafc619367334ce545c5bb9b8826488c564dee8f291a5d0b60fc3ad5a7901"
+            "b80a4716e2ac58b2f9615bec2feea0e148d9293dd1040179831e84b8ca5db1825f1f50430987d3ca8470d264f87033b0f98267f3dd32f1abc359ec703c38da00"
         );
 
         // Tamper with hostname -> must fail
@@ -328,12 +328,12 @@ mod tests {
         use super::ssh::{LoadedSshKey, SshKeyError};
 
         // 1. Roundtrip in-memory PEM export + import + sign + verify
-        let key = LoadedSshKey::generate_ed25519("pavel@sockcast-test");
+        let key = LoadedSshKey::generate_ed25519("pavel@sshcast-test");
         let pem = key.to_openssh_pem();
         let parsed = LoadedSshKey::parse_openssh_pem(&pem, None).unwrap();
         assert_eq!(parsed.key_blob(), key.key_blob());
         assert_eq!(parsed.fingerprint_sha256(), key.fingerprint_sha256());
-        assert_eq!(parsed.comment(), "pavel@sockcast-test");
+        assert_eq!(parsed.comment(), "pavel@sshcast-test");
         assert_eq!(parsed.key_type(), "ssh-ed25519");
 
         let challenge = b"SSH2_AGENTC_SIGN_REQUEST test challenge payload";
@@ -341,7 +341,7 @@ mod tests {
         parsed.verify_ssh_signature_blob(challenge, &sig_blob).unwrap();
 
         // 2. Test real ssh-keygen output (unencrypted, aes256-ctr, and chacha20-poly1305@openssh.com)
-        let tmp_dir = std::env::temp_dir().join(format!("sockcast_ssh_key_test_{}", std::process::id()));
+        let tmp_dir = std::env::temp_dir().join(format!("sshcast_ssh_key_test_{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&tmp_dir);
         std::fs::create_dir_all(&tmp_dir).unwrap();
 

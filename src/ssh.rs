@@ -39,7 +39,7 @@ enum PrivateKeyInner {
 }
 
 /// An in-memory SSH private key capable of advertising its RFC 4253 public key blob
-/// and signing `SSH2_AGENTC_SIGN_REQUEST` challenges directly inside `sockcast-client`
+/// and signing `SSH2_AGENTC_SIGN_REQUEST` challenges directly inside `sshcast-client`
 /// (native or WASM) without requiring an external OS `ssh-agent`.
 #[derive(Clone)]
 pub struct LoadedSshKey {

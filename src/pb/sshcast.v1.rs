@@ -35,7 +35,7 @@ pub struct NodeAuth {
     pub timestamp_unix_ms: u64,
     #[prost(bytes = "vec", tag = "3")]
     pub nonce: ::prost::alloc::vec::Vec<u8>,
-    /// Signs canonical ("sockcast-rpc-auth-v1" || grant.user_signature || timestamp || nonce)
+    /// Signs canonical ("sshcast-rpc-auth-v1" || grant.user_signature || timestamp || nonce)
     #[prost(bytes = "vec", tag = "4")]
     pub node_signature: ::prost::alloc::vec::Vec<u8>,
 }
@@ -131,13 +131,13 @@ pub struct SignRequest {
     pub process_context: ::core::option::Option<ProcessContext>,
     #[prost(message, optional, tag = "7")]
     pub ssh_auth_context: ::core::option::Option<SshAuthContext>,
-    /// Verified end-to-end by sockcast-client
+    /// Verified end-to-end by sshcast-client
     #[prost(message, optional, tag = "8")]
     pub relay_grant: ::core::option::Option<NodeGrant>,
     /// Ed25519 signature by relay's node_privkey over fields 1..8
     #[prost(bytes = "vec", tag = "9")]
     pub relay_signature: ::prost::alloc::vec::Vec<u8>,
-    /// RPC caller authentication verified by sockcast-server
+    /// RPC caller authentication verified by sshcast-server
     #[prost(message, optional, tag = "10")]
     pub auth: ::core::option::Option<NodeAuth>,
 }
@@ -169,7 +169,7 @@ pub struct WorkstationStatus {
     #[prost(message, repeated, tag = "4")]
     pub keys: ::prost::alloc::vec::Vec<PublicKey>,
 }
-/// Immediate automated receipt sent by sockcast-client within <1.5s of receiving SignRequest
+/// Immediate automated receipt sent by sshcast-client within <1.5s of receiving SignRequest
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct SignAck {
     #[prost(string, tag = "1")]
@@ -373,7 +373,7 @@ impl NodeRole {
 }
 /// Generated client implementations.
 #[cfg(not(target_arch = "wasm32"))]
-pub mod sockcast_service_client {
+pub mod sshcast_service_client {
     #![allow(
         unused_variables,
         dead_code,
@@ -384,10 +384,10 @@ pub mod sockcast_service_client {
     use tonic::codegen::*;
     use tonic::codegen::http::Uri;
     #[derive(Debug, Clone)]
-    pub struct SockcastServiceClient<T> {
+    pub struct SshcastServiceClient<T> {
         inner: tonic::client::Grpc<T>,
     }
-    impl SockcastServiceClient<tonic::transport::Channel> {
+    impl SshcastServiceClient<tonic::transport::Channel> {
         /// Attempt to create a new client by connecting to a given endpoint.
         pub async fn connect<D>(dst: D) -> Result<Self, tonic::transport::Error>
         where
@@ -398,7 +398,7 @@ pub mod sockcast_service_client {
             Ok(Self::new(conn))
         }
     }
-    impl<T> SockcastServiceClient<T>
+    impl<T> SshcastServiceClient<T>
     where
         T: tonic::client::GrpcService<tonic::body::BoxBody>,
         T::Error: Into<StdError>,
@@ -416,7 +416,7 @@ pub mod sockcast_service_client {
         pub fn with_interceptor<F>(
             inner: T,
             interceptor: F,
-        ) -> SockcastServiceClient<InterceptedService<T, F>>
+        ) -> SshcastServiceClient<InterceptedService<T, F>>
         where
             F: tonic::service::Interceptor,
             T::ResponseBody: Default,
@@ -430,7 +430,7 @@ pub mod sockcast_service_client {
                 http::Request<tonic::body::BoxBody>,
             >>::Error: Into<StdError> + std::marker::Send + std::marker::Sync,
         {
-            SockcastServiceClient::new(InterceptedService::new(inner, interceptor))
+            SshcastServiceClient::new(InterceptedService::new(inner, interceptor))
         }
         /// Compress requests with the given encoding.
         ///
@@ -463,7 +463,7 @@ pub mod sockcast_service_client {
             self.inner = self.inner.max_encoding_message_size(limit);
             self
         }
-        /// Called by sockcast-relay
+        /// Called by sshcast-relay
         pub async fn get_identities(
             &mut self,
             request: impl tonic::IntoRequest<super::GetIdentitiesRequest>,
@@ -481,11 +481,11 @@ pub mod sockcast_service_client {
                 })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
-                "/sockcast.v1.SockcastService/GetIdentities",
+                "/sshcast.v1.SshcastService/GetIdentities",
             );
             let mut req = request.into_request();
             req.extensions_mut()
-                .insert(GrpcMethod::new("sockcast.v1.SockcastService", "GetIdentities"));
+                .insert(GrpcMethod::new("sshcast.v1.SshcastService", "GetIdentities"));
             self.inner.unary(req, path, codec).await
         }
         pub async fn sign(
@@ -502,14 +502,14 @@ pub mod sockcast_service_client {
                 })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
-                "/sockcast.v1.SockcastService/Sign",
+                "/sshcast.v1.SshcastService/Sign",
             );
             let mut req = request.into_request();
             req.extensions_mut()
-                .insert(GrpcMethod::new("sockcast.v1.SockcastService", "Sign"));
+                .insert(GrpcMethod::new("sshcast.v1.SshcastService", "Sign"));
             self.inner.unary(req, path, codec).await
         }
-        /// Persistent bidirectional stream maintained by sockcast-client
+        /// Persistent bidirectional stream maintained by sshcast-client
         pub async fn connect_workstation(
             &mut self,
             request: impl tonic::IntoStreamingRequest<
@@ -529,16 +529,16 @@ pub mod sockcast_service_client {
                 })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
-                "/sockcast.v1.SockcastService/ConnectWorkstation",
+                "/sshcast.v1.SshcastService/ConnectWorkstation",
             );
             let mut req = request.into_streaming_request();
             req.extensions_mut()
                 .insert(
-                    GrpcMethod::new("sockcast.v1.SockcastService", "ConnectWorkstation"),
+                    GrpcMethod::new("sshcast.v1.SshcastService", "ConnectWorkstation"),
                 );
             self.inner.streaming(req, path, codec).await
         }
-        /// Persistent bidirectional stream maintained by sockcast-relay when Zellij service is enabled
+        /// Persistent bidirectional stream maintained by sshcast-relay when Zellij service is enabled
         pub async fn connect_relay(
             &mut self,
             request: impl tonic::IntoStreamingRequest<
@@ -558,12 +558,12 @@ pub mod sockcast_service_client {
                 })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
-                "/sockcast.v1.SockcastService/ConnectRelay",
+                "/sshcast.v1.SshcastService/ConnectRelay",
             );
             let mut req = request.into_streaming_request();
             req.extensions_mut()
                 .insert(
-                    GrpcMethod::new("sockcast.v1.SockcastService", "ConnectRelay"),
+                    GrpcMethod::new("sshcast.v1.SshcastService", "ConnectRelay"),
                 );
             self.inner.streaming(req, path, codec).await
         }
@@ -571,7 +571,7 @@ pub mod sockcast_service_client {
 }
 /// Generated server implementations.
 #[cfg(not(target_arch = "wasm32"))]
-pub mod sockcast_service_server {
+pub mod sshcast_service_server {
     #![allow(
         unused_variables,
         dead_code,
@@ -580,10 +580,10 @@ pub mod sockcast_service_server {
         clippy::let_unit_value,
     )]
     use tonic::codegen::*;
-    /// Generated trait containing gRPC methods that should be implemented for use with SockcastServiceServer.
+    /// Generated trait containing gRPC methods that should be implemented for use with SshcastServiceServer.
     #[async_trait]
-    pub trait SockcastService: std::marker::Send + std::marker::Sync + 'static {
-        /// Called by sockcast-relay
+    pub trait SshcastService: std::marker::Send + std::marker::Sync + 'static {
+        /// Called by sshcast-relay
         async fn get_identities(
             &self,
             request: tonic::Request<super::GetIdentitiesRequest>,
@@ -601,7 +601,7 @@ pub mod sockcast_service_server {
             >
             + std::marker::Send
             + 'static;
-        /// Persistent bidirectional stream maintained by sockcast-client
+        /// Persistent bidirectional stream maintained by sshcast-client
         async fn connect_workstation(
             &self,
             request: tonic::Request<tonic::Streaming<super::ClientStreamMessage>>,
@@ -615,7 +615,7 @@ pub mod sockcast_service_server {
             >
             + std::marker::Send
             + 'static;
-        /// Persistent bidirectional stream maintained by sockcast-relay when Zellij service is enabled
+        /// Persistent bidirectional stream maintained by sshcast-relay when Zellij service is enabled
         async fn connect_relay(
             &self,
             request: tonic::Request<tonic::Streaming<super::RelayStreamMessage>>,
@@ -625,14 +625,14 @@ pub mod sockcast_service_server {
         >;
     }
     #[derive(Debug)]
-    pub struct SockcastServiceServer<T> {
+    pub struct SshcastServiceServer<T> {
         inner: Arc<T>,
         accept_compression_encodings: EnabledCompressionEncodings,
         send_compression_encodings: EnabledCompressionEncodings,
         max_decoding_message_size: Option<usize>,
         max_encoding_message_size: Option<usize>,
     }
-    impl<T> SockcastServiceServer<T> {
+    impl<T> SshcastServiceServer<T> {
         pub fn new(inner: T) -> Self {
             Self::from_arc(Arc::new(inner))
         }
@@ -683,9 +683,9 @@ pub mod sockcast_service_server {
             self
         }
     }
-    impl<T, B> tonic::codegen::Service<http::Request<B>> for SockcastServiceServer<T>
+    impl<T, B> tonic::codegen::Service<http::Request<B>> for SshcastServiceServer<T>
     where
-        T: SockcastService,
+        T: SshcastService,
         B: Body + std::marker::Send + 'static,
         B::Error: Into<StdError> + std::marker::Send + 'static,
     {
@@ -700,11 +700,11 @@ pub mod sockcast_service_server {
         }
         fn call(&mut self, req: http::Request<B>) -> Self::Future {
             match req.uri().path() {
-                "/sockcast.v1.SockcastService/GetIdentities" => {
+                "/sshcast.v1.SshcastService/GetIdentities" => {
                     #[allow(non_camel_case_types)]
-                    struct GetIdentitiesSvc<T: SockcastService>(pub Arc<T>);
+                    struct GetIdentitiesSvc<T: SshcastService>(pub Arc<T>);
                     impl<
-                        T: SockcastService,
+                        T: SshcastService,
                     > tonic::server::UnaryService<super::GetIdentitiesRequest>
                     for GetIdentitiesSvc<T> {
                         type Response = super::GetIdentitiesResponse;
@@ -718,7 +718,7 @@ pub mod sockcast_service_server {
                         ) -> Self::Future {
                             let inner = Arc::clone(&self.0);
                             let fut = async move {
-                                <T as SockcastService>::get_identities(&inner, request)
+                                <T as SshcastService>::get_identities(&inner, request)
                                     .await
                             };
                             Box::pin(fut)
@@ -746,11 +746,11 @@ pub mod sockcast_service_server {
                     };
                     Box::pin(fut)
                 }
-                "/sockcast.v1.SockcastService/Sign" => {
+                "/sshcast.v1.SshcastService/Sign" => {
                     #[allow(non_camel_case_types)]
-                    struct SignSvc<T: SockcastService>(pub Arc<T>);
+                    struct SignSvc<T: SshcastService>(pub Arc<T>);
                     impl<
-                        T: SockcastService,
+                        T: SshcastService,
                     > tonic::server::UnaryService<super::SignRequest> for SignSvc<T> {
                         type Response = super::SignResponse;
                         type Future = BoxFuture<
@@ -763,7 +763,7 @@ pub mod sockcast_service_server {
                         ) -> Self::Future {
                             let inner = Arc::clone(&self.0);
                             let fut = async move {
-                                <T as SockcastService>::sign(&inner, request).await
+                                <T as SshcastService>::sign(&inner, request).await
                             };
                             Box::pin(fut)
                         }
@@ -790,11 +790,11 @@ pub mod sockcast_service_server {
                     };
                     Box::pin(fut)
                 }
-                "/sockcast.v1.SockcastService/ConnectWorkstation" => {
+                "/sshcast.v1.SshcastService/ConnectWorkstation" => {
                     #[allow(non_camel_case_types)]
-                    struct ConnectWorkstationSvc<T: SockcastService>(pub Arc<T>);
+                    struct ConnectWorkstationSvc<T: SshcastService>(pub Arc<T>);
                     impl<
-                        T: SockcastService,
+                        T: SshcastService,
                     > tonic::server::StreamingService<super::ClientStreamMessage>
                     for ConnectWorkstationSvc<T> {
                         type Response = super::ServerStreamMessage;
@@ -811,7 +811,7 @@ pub mod sockcast_service_server {
                         ) -> Self::Future {
                             let inner = Arc::clone(&self.0);
                             let fut = async move {
-                                <T as SockcastService>::connect_workstation(&inner, request)
+                                <T as SshcastService>::connect_workstation(&inner, request)
                                     .await
                             };
                             Box::pin(fut)
@@ -839,11 +839,11 @@ pub mod sockcast_service_server {
                     };
                     Box::pin(fut)
                 }
-                "/sockcast.v1.SockcastService/ConnectRelay" => {
+                "/sshcast.v1.SshcastService/ConnectRelay" => {
                     #[allow(non_camel_case_types)]
-                    struct ConnectRelaySvc<T: SockcastService>(pub Arc<T>);
+                    struct ConnectRelaySvc<T: SshcastService>(pub Arc<T>);
                     impl<
-                        T: SockcastService,
+                        T: SshcastService,
                     > tonic::server::StreamingService<super::RelayStreamMessage>
                     for ConnectRelaySvc<T> {
                         type Response = super::ServerToRelayMessage;
@@ -860,7 +860,7 @@ pub mod sockcast_service_server {
                         ) -> Self::Future {
                             let inner = Arc::clone(&self.0);
                             let fut = async move {
-                                <T as SockcastService>::connect_relay(&inner, request)
+                                <T as SshcastService>::connect_relay(&inner, request)
                                     .await
                             };
                             Box::pin(fut)
@@ -908,7 +908,7 @@ pub mod sockcast_service_server {
             }
         }
     }
-    impl<T> Clone for SockcastServiceServer<T> {
+    impl<T> Clone for SshcastServiceServer<T> {
         fn clone(&self) -> Self {
             let inner = self.inner.clone();
             Self {
@@ -921,8 +921,8 @@ pub mod sockcast_service_server {
         }
     }
     /// Generated gRPC service name
-    pub const SERVICE_NAME: &str = "sockcast.v1.SockcastService";
-    impl<T> tonic::server::NamedService for SockcastServiceServer<T> {
+    pub const SERVICE_NAME: &str = "sshcast.v1.SshcastService";
+    impl<T> tonic::server::NamedService for SshcastServiceServer<T> {
         const NAME: &'static str = SERVICE_NAME;
     }
 }

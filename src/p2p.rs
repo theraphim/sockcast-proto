@@ -60,7 +60,7 @@ pub fn derive_p2p_session_keys(
     answer_sig: &[u8],
 ) -> ([u8; 32], [u8; 32], [u8; 32]) {
     let mut master = Sha256::new();
-    master.update(b"sockcast-zellij-p2p-master-v1\x00");
+    master.update(b"sshcast-zellij-p2p-master-v1\x00");
     master.update(tunnel_id.as_bytes());
     master.update(offer.secret_b64.as_bytes());
     master.update(offer_sig);

@@ -1,11 +1,11 @@
 [package]
-name = "sockcast-proto"
+name = "sshcast-proto"
 version = "0.1.0"
 edition = "2021"
 build = false
-description = "Shared Protobuf definitions, Ed25519 NodeGrant cryptography, RFC 4252 SSH payload parser, and enrollment bundle codec for Sockcast"
+description = "Shared Protobuf definitions, Ed25519 NodeGrant cryptography, RFC 4252 SSH payload parser, and enrollment bundle codec for Sshcast"
 license = "MIT OR Apache-2.0"
-repository = "https://github.com/theraphim/sockcast-proto"
+repository = "https://github.com/theraphim/sshcast-proto"
 
 [lib]
 crate-type = ["rlib", "cdylib"]

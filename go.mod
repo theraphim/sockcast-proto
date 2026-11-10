@@ -1,4 +1,4 @@
-module github.com/theraphim/sockcast-proto
+module stingr.net/go/sshcast-proto
 
 go 1.27.3
 

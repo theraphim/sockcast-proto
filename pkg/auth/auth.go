@@ -8,13 +8,13 @@ import (
 	"fmt"
 	"math"
 
-	sockcastv1 "github.com/theraphim/sockcast-proto/gen/go/sockcast/v1"
+	sshcastv1 "stingr.net/go/sshcast-proto/gen/go/sshcast/v1"
 )
 
 const (
-	DomainNodeGrant   = "sockcast-node-grant-v1\x00"
-	DomainNodeAuth    = "sockcast-rpc-auth-v1\x00"
-	DomainSignRequest = "sockcast-sign-request-v1\x00"
+	DomainNodeGrant   = "sshcast-node-grant-v1\x00"
+	DomainNodeAuth    = "sshcast-rpc-auth-v1\x00"
+	DomainSignRequest = "sshcast-sign-request-v1\x00"
 
 	// DefaultMaxClockSkewMs is the default maximum allowed clock skew (5 minutes) for RPC auth tokens.
 	DefaultMaxClockSkewMs uint64 = 5 * 60 * 1000
@@ -72,7 +72,7 @@ func appendString(buf []byte, s string) []byte {
 }
 
 // CanonicalNodeGrantBytes returns the deterministic byte representation of a NodeGrant for Ed25519 signing.
-func CanonicalNodeGrantBytes(g *sockcastv1.NodeGrant) []byte {
+func CanonicalNodeGrantBytes(g *sshcastv1.NodeGrant) []byte {
 	buf := make([]byte, 0, 256)
 	buf = append(buf, DomainNodeGrant...)
 	buf = appendString(buf, g.GetUserId())
@@ -86,7 +86,7 @@ func CanonicalNodeGrantBytes(g *sockcastv1.NodeGrant) []byte {
 }
 
 // CanonicalNodeAuthBytes returns the deterministic byte representation of a NodeAuth for Ed25519 signing.
-func CanonicalNodeAuthBytes(a *sockcastv1.NodeAuth) []byte {
+func CanonicalNodeAuthBytes(a *sshcastv1.NodeAuth) []byte {
 	buf := make([]byte, 0, 160)
 	buf = append(buf, DomainNodeAuth...)
 	var grantSig []byte
@@ -100,7 +100,7 @@ func CanonicalNodeAuthBytes(a *sockcastv1.NodeAuth) []byte {
 }
 
 // CanonicalSignRequestBytes returns the deterministic byte representation of a SignRequest for end-to-end relay signing.
-func CanonicalSignRequestBytes(r *sockcastv1.SignRequest) []byte {
+func CanonicalSignRequestBytes(r *sshcastv1.SignRequest) []byte {
 	buf := make([]byte, 0, 512)
 	buf = append(buf, DomainSignRequest...)
 	buf = appendString(buf, r.GetRequestId())
@@ -144,7 +144,7 @@ func CanonicalSignRequestBytes(r *sockcastv1.SignRequest) []byte {
 }
 
 // SignNodeGrant signs g in-place using userPrivkey (64-byte Ed25519 private key).
-func SignNodeGrant(g *sockcastv1.NodeGrant, userPrivkey ed25519.PrivateKey) error {
+func SignNodeGrant(g *sshcastv1.NodeGrant, userPrivkey ed25519.PrivateKey) error {
 	if g == nil {
 		return ErrNilGrant
 	}
@@ -158,7 +158,7 @@ func SignNodeGrant(g *sockcastv1.NodeGrant, userPrivkey ed25519.PrivateKey) erro
 }
 
 // VerifyNodeGrant verifies a NodeGrant's structure, expiration, and user Ed25519 signature.
-func VerifyNodeGrant(g *sockcastv1.NodeGrant, nowUnixSec uint64) error {
+func VerifyNodeGrant(g *sshcastv1.NodeGrant, nowUnixSec uint64) error {
 	if g == nil {
 		return ErrNilGrant
 	}
@@ -171,7 +171,7 @@ func VerifyNodeGrant(g *sockcastv1.NodeGrant, nowUnixSec uint64) error {
 	if g.GetUserId() == "" || g.GetNodeId() == "" {
 		return ErrEmptyIdentity
 	}
-	if g.GetRole() == sockcastv1.NodeRole_NODE_ROLE_UNSPECIFIED {
+	if g.GetRole() == sshcastv1.NodeRole_NODE_ROLE_UNSPECIFIED {
 		return ErrUnspecifiedRole
 	}
 	if g.GetExpiresAtUnixSec() > 0 && nowUnixSec > g.GetExpiresAtUnixSec() {
@@ -185,7 +185,7 @@ func VerifyNodeGrant(g *sockcastv1.NodeGrant, nowUnixSec uint64) error {
 }
 
 // SignNodeAuth signs a NodeAuth in-place using nodePrivkey.
-func SignNodeAuth(a *sockcastv1.NodeAuth, nodePrivkey ed25519.PrivateKey) error {
+func SignNodeAuth(a *sshcastv1.NodeAuth, nodePrivkey ed25519.PrivateKey) error {
 	if a == nil || a.Grant == nil {
 		return ErrNilAuth
 	}
@@ -195,14 +195,14 @@ func SignNodeAuth(a *sockcastv1.NodeAuth, nodePrivkey ed25519.PrivateKey) error 
 }
 
 // VerifyNodeAuth verifies both the embedded NodeGrant and the RPC caller's NodeAuth signature and timestamp skew.
-func VerifyNodeAuth(a *sockcastv1.NodeAuth, expectedRole sockcastv1.NodeRole, nowUnixMs uint64, maxSkewMs uint64) error {
+func VerifyNodeAuth(a *sshcastv1.NodeAuth, expectedRole sshcastv1.NodeRole, nowUnixMs uint64, maxSkewMs uint64) error {
 	if a == nil || a.GetGrant() == nil {
 		return ErrNilAuth
 	}
 	if err := VerifyNodeGrant(a.GetGrant(), nowUnixMs/1000); err != nil {
 		return err
 	}
-	if expectedRole != sockcastv1.NodeRole_NODE_ROLE_UNSPECIFIED && a.GetGrant().GetRole() != expectedRole {
+	if expectedRole != sshcastv1.NodeRole_NODE_ROLE_UNSPECIFIED && a.GetGrant().GetRole() != expectedRole {
 		return fmt.Errorf("%w: got %v, want %v", ErrRoleMismatch, a.GetGrant().GetRole(), expectedRole)
 	}
 	if len(a.GetNodeSignature()) != ed25519.SignatureSize {
@@ -227,7 +227,7 @@ func VerifyNodeAuth(a *sockcastv1.NodeAuth, expectedRole sockcastv1.NodeRole, no
 }
 
 // SignSignRequest signs a SignRequest in-place using the relay's nodePrivkey.
-func SignSignRequest(r *sockcastv1.SignRequest, relayPrivkey ed25519.PrivateKey) error {
+func SignSignRequest(r *sshcastv1.SignRequest, relayPrivkey ed25519.PrivateKey) error {
 	if r == nil || r.RelayGrant == nil {
 		return ErrNilSignRequest
 	}
@@ -238,7 +238,7 @@ func SignSignRequest(r *sockcastv1.SignRequest, relayPrivkey ed25519.PrivateKey)
 
 // VerifySignRequest verifies the relay's NodeGrant, enforces ProcessContext.Hostname == RelayGrant.NodeId,
 // and verifies the end-to-end relay Ed25519 signature over the SignRequest.
-func VerifySignRequest(r *sockcastv1.SignRequest, nowUnixSec uint64) error {
+func VerifySignRequest(r *sshcastv1.SignRequest, nowUnixSec uint64) error {
 	if r == nil || r.GetRelayGrant() == nil {
 		return ErrNilSignRequest
 	}
@@ -246,7 +246,7 @@ func VerifySignRequest(r *sockcastv1.SignRequest, nowUnixSec uint64) error {
 	if err := VerifyNodeGrant(grant, nowUnixSec); err != nil {
 		return err
 	}
-	if grant.GetRole() != sockcastv1.NodeRole_NODE_ROLE_RELAY {
+	if grant.GetRole() != sshcastv1.NodeRole_NODE_ROLE_RELAY {
 		return fmt.Errorf("%w: sign request grant role is %v", ErrRoleMismatch, grant.GetRole())
 	}
 	if r.GetProcessContext() != nil && r.GetProcessContext().GetHostname() != grant.GetNodeId() {

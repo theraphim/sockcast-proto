@@ -4,10 +4,10 @@ use ed25519_dalek::{Signature, Signer, SigningKey, Verifier, VerifyingKey};
 use rand::RngCore;
 use thiserror::Error;
 
-pub const DOMAIN_NODE_GRANT: &[u8] = b"sockcast-node-grant-v1\x00";
-pub const DOMAIN_NODE_AUTH: &[u8] = b"sockcast-rpc-auth-v1\x00";
-pub const DOMAIN_SIGN_REQUEST: &[u8] = b"sockcast-sign-request-v1\x00";
-pub const DOMAIN_ZELLIJ_FRAME: &[u8] = b"sockcast-zellij-frame-v1\x00";
+pub const DOMAIN_NODE_GRANT: &[u8] = b"sshcast-node-grant-v1\x00";
+pub const DOMAIN_NODE_AUTH: &[u8] = b"sshcast-rpc-auth-v1\x00";
+pub const DOMAIN_SIGN_REQUEST: &[u8] = b"sshcast-sign-request-v1\x00";
+pub const DOMAIN_ZELLIJ_FRAME: &[u8] = b"sshcast-zellij-frame-v1\x00";
 
 pub const DEFAULT_MAX_CLOCK_SKEW_MS: u64 = 5 * 60 * 1000;
 
