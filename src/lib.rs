@@ -473,7 +473,7 @@ mod tests {
             client_sk,
             client_grant,
         );
-        let bundle_token = bundle.encode().unwrap();
+        let bundle_token = format!("{}.rk_dGVzdC1yb290LWtleS1zdWZmaXg", bundle.encode().unwrap());
 
         let mut engine = WasmWorkstationEngine::new();
 

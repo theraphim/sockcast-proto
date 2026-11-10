@@ -65,13 +65,22 @@ impl EnrollmentBundle {
         ))
     }
 
-    /// Decodes a compact `sc1_<base64>` token string back into an `EnrollmentBundle`.
+    /// Decodes a compact `sc1_<base64>` token string (with optional `.rk_<base64_seed>` suffix)
+    /// back into an `EnrollmentBundle`.
     pub fn decode(token: &str) -> Result<Self, BundleError> {
-        let token = token.trim();
-        let b64_part = token
+        let candidate = token
+            .split_whitespace()
+            .find(|w| w.starts_with(BUNDLE_PREFIX))
+            .unwrap_or_else(|| token.trim());
+        let cleaned: String = candidate.chars().filter(|c| !c.is_whitespace()).collect();
+        let base_token = cleaned
+            .split_once(".rk_")
+            .map(|(b, _)| b)
+            .unwrap_or(cleaned.as_str());
+        let b64_part = base_token
             .strip_prefix(BUNDLE_PREFIX)
             .ok_or(BundleError::InvalidPrefix)?;
-        let json_bytes = URL_SAFE_NO_PAD.decode(b64_part)?;
+        let json_bytes = URL_SAFE_NO_PAD.decode(b64_part.trim_end_matches('='))?;
         let wire: EnrollmentBundleWire = serde_json::from_slice(&json_bytes)?;
 
         let seed_vec = URL_SAFE_NO_PAD.decode(&wire.node_privkey_seed_b64)?;
