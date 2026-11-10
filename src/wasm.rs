@@ -97,32 +97,51 @@ impl WasmWorkstationEngine {
         let Some(pc) = pc else {
             return ("ssh".to_string(), String::new());
         };
-        let shells = ["sh", "bash", "zsh", "fish", "dash", "ksh", "tcsh", "csh", "sshd", "systemd", "init", "tmux", "zellij", "screen"];
-        for anc in &pc.ancestors {
-            let base = anc
-                .comm
-                .rsplit('/')
-                .next()
-                .unwrap_or(&anc.comm)
-                .trim_start_matches('-');
-            if !base.is_empty() && !shells.contains(&base) && base != "ssh" {
-                let cmd = if anc.cmdline.trim().is_empty() {
-                    anc.comm.clone()
-                } else {
-                    anc.cmdline.clone()
-                };
-                return (base.to_string(), cmd);
+        let leaf_comm = pc
+            .comm
+            .trim()
+            .rsplit('/')
+            .next()
+            .unwrap_or(&pc.comm)
+            .trim_start_matches('-');
+        if leaf_comm == "ssh" {
+            if let Some(parent) = pc.ancestors.first() {
+                let pcomm = parent
+                    .comm
+                    .trim()
+                    .rsplit('/')
+                    .next()
+                    .unwrap_or(&parent.comm)
+                    .trim_start_matches('-');
+                if matches!(
+                    pcomm,
+                    "scp"
+                        | "rsync"
+                        | "git"
+                        | "git-remote-ext"
+                        | "sftp"
+                        | "borg"
+                        | "restic"
+                        | "ansible-playbook"
+                ) {
+                    let cmd = if parent.cmdline.trim().is_empty() {
+                        pcomm.to_string()
+                    } else {
+                        parent.cmdline.trim().to_string()
+                    };
+                    return (pcomm.to_string(), cmd);
+                }
             }
         }
-        let comm = if pc.comm.trim().is_empty() {
+        let comm = if leaf_comm.is_empty() {
             "ssh".to_string()
         } else {
-            pc.comm.clone()
+            leaf_comm.to_string()
         };
         let cmdline = if pc.cmdline.trim().is_empty() {
             comm.clone()
         } else {
-            pc.cmdline.clone()
+            pc.cmdline.trim().to_string()
         };
         (comm, cmdline)
     }
