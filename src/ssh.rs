@@ -1,4 +1,7 @@
 use crate::openssh_cipher::decrypt_openssh_private_section;
+use crate::rsa_ssh::{
+    parse_classic_rsa_pem, parse_openssh_rsa_private_fields, RsaPrivateKey,
+};
 use crate::v1::{PublicKey, SshAuthContext};
 use base64::engine::general_purpose::{STANDARD, STANDARD_NO_PAD};
 use base64::Engine;
@@ -23,10 +26,16 @@ pub enum SshKeyError {
     UnsupportedCipher(String),
     #[error("unsupported OpenSSH KDF '{0}'")]
     UnsupportedKdf(String),
-    #[error("unsupported SSH key type '{0}' (supported: ssh-ed25519)")]
+    #[error("unsupported SSH key type '{0}' (supported: ssh-ed25519, ssh-rsa)")]
     UnsupportedKeyType(String),
     #[error("SSH signature verification failed: {0}")]
     SignatureVerificationFailed(String),
+}
+
+#[derive(Clone)]
+enum PrivateKeyInner {
+    Ed25519(SigningKey),
+    Rsa(RsaPrivateKey),
 }
 
 /// An in-memory SSH private key capable of advertising its RFC 4253 public key blob
@@ -34,7 +43,7 @@ pub enum SshKeyError {
 /// (native or WASM) without requiring an external OS `ssh-agent`.
 #[derive(Clone)]
 pub struct LoadedSshKey {
-    signing_key: SigningKey,
+    inner: PrivateKeyInner,
     public_key: PublicKey,
 }
 
@@ -55,7 +64,17 @@ impl LoadedSshKey {
         let key_blob = encode_ed25519_public_key_blob(&verifying_key);
         let public_key = parse_public_key_blob(key_blob, comment);
         Self {
-            signing_key,
+            inner: PrivateKeyInner::Ed25519(signing_key),
+            public_key,
+        }
+    }
+
+    /// Creates a `LoadedSshKey` from an `RsaPrivateKey` and comment.
+    pub fn from_rsa_private_key(rsa_key: RsaPrivateKey, comment: impl Into<String>) -> Self {
+        let key_blob = rsa_key.public_key_blob();
+        let public_key = parse_public_key_blob(key_blob, comment);
+        Self {
+            inner: PrivateKeyInner::Rsa(rsa_key),
             public_key,
         }
     }
@@ -67,10 +86,19 @@ impl LoadedSshKey {
         Self::from_ed25519_signing_key(signing_key, comment)
     }
 
-    /// Parses an OpenSSH private key (`-----BEGIN OPENSSH PRIVATE KEY-----`).
+    /// Parses an OpenSSH private key (`-----BEGIN OPENSSH PRIVATE KEY-----`) or classic RSA/PKCS#8 PEM
+    /// (`-----BEGIN RSA PRIVATE KEY-----`, `-----BEGIN PRIVATE KEY-----`).
     /// Supports both unencrypted keys (`ciphername = "none"`) and passphrase-encrypted keys
     /// (`kdfname = "bcrypt"` with `aes256-ctr` or `chacha20-poly1305@openssh.com`).
     pub fn parse_openssh_pem(pem: &str, passphrase: Option<&str>) -> Result<Self, SshKeyError> {
+        let trimmed = pem.trim();
+        if trimmed.contains("-----BEGIN RSA PRIVATE KEY-----")
+            || trimmed.contains("-----BEGIN PRIVATE KEY-----")
+        {
+            let (rsa_key, comment) = parse_classic_rsa_pem(trimmed, passphrase)?;
+            return Ok(Self::from_rsa_private_key(rsa_key, comment));
+        }
+
         let b64_body = extract_openssh_pem_body(pem)?;
         let raw = STANDARD
             .decode(b64_body.as_bytes())
@@ -136,55 +164,71 @@ impl LoadedSshKey {
 
         let key_type = read_string(&mut priv_cursor)
             .ok_or_else(|| SshKeyError::InvalidFormat("truncated private key_type".to_string()))?;
-        if key_type != "ssh-ed25519" {
-            return Err(SshKeyError::UnsupportedKeyType(key_type));
+        match key_type.as_str() {
+            "ssh-ed25519" => {
+                let pub_bytes = read_bytes(&mut priv_cursor).ok_or_else(|| {
+                    SshKeyError::InvalidFormat("truncated ed25519 pubkey".to_string())
+                })?;
+                let priv_bytes = read_bytes(&mut priv_cursor).ok_or_else(|| {
+                    SshKeyError::InvalidFormat("truncated ed25519 privkey".to_string())
+                })?;
+                let comment = read_string(&mut priv_cursor).ok_or_else(|| {
+                    SshKeyError::InvalidFormat("truncated key comment".to_string())
+                })?;
+
+                if pub_bytes.len() != 32 || priv_bytes.len() != 64 {
+                    return Err(SshKeyError::InvalidFormat(format!(
+                        "invalid ed25519 key lengths (pub={}, priv={})",
+                        pub_bytes.len(),
+                        priv_bytes.len()
+                    )));
+                }
+
+                let seed: [u8; 32] = priv_bytes[..32]
+                    .try_into()
+                    .expect("slice length checked above");
+                let signing_key = SigningKey::from_bytes(&seed);
+                let derived_pub = signing_key.verifying_key().to_bytes();
+                if derived_pub.as_slice() != pub_bytes || &priv_bytes[32..] != pub_bytes {
+                    return Err(SshKeyError::InvalidFormat(
+                        "ed25519 public key does not match private key seed".to_string(),
+                    ));
+                }
+
+                Ok(Self::from_ed25519_signing_key(signing_key, comment))
+            }
+            "ssh-rsa" => {
+                let (rsa_key, comment) = parse_openssh_rsa_private_fields(&mut priv_cursor)?;
+                Ok(Self::from_rsa_private_key(rsa_key, comment))
+            }
+            _ => Err(SshKeyError::UnsupportedKeyType(key_type)),
         }
-
-        let pub_bytes = read_bytes(&mut priv_cursor)
-            .ok_or_else(|| SshKeyError::InvalidFormat("truncated ed25519 pubkey".to_string()))?;
-        let priv_bytes = read_bytes(&mut priv_cursor)
-            .ok_or_else(|| SshKeyError::InvalidFormat("truncated ed25519 privkey".to_string()))?;
-        let comment = read_string(&mut priv_cursor)
-            .ok_or_else(|| SshKeyError::InvalidFormat("truncated key comment".to_string()))?;
-
-        if pub_bytes.len() != 32 || priv_bytes.len() != 64 {
-            return Err(SshKeyError::InvalidFormat(format!(
-                "invalid ed25519 key lengths (pub={}, priv={})",
-                pub_bytes.len(),
-                priv_bytes.len()
-            )));
-        }
-
-        let seed: [u8; 32] = priv_bytes[..32]
-            .try_into()
-            .expect("slice length checked above");
-        let signing_key = SigningKey::from_bytes(&seed);
-        let derived_pub = signing_key.verifying_key().to_bytes();
-        if derived_pub.as_slice() != pub_bytes || &priv_bytes[32..] != pub_bytes {
-            return Err(SshKeyError::InvalidFormat(
-                "ed25519 public key does not match private key seed".to_string(),
-            ));
-        }
-
-        Ok(Self::from_ed25519_signing_key(signing_key, comment))
     }
 
     /// Serializes this key as an unencrypted OpenSSH private key (`-----BEGIN OPENSSH PRIVATE KEY-----`).
     pub fn to_openssh_pem(&self) -> String {
-        let pub_bytes = self.signing_key.verifying_key().to_bytes();
-        let seed_bytes = self.signing_key.to_bytes();
-        let mut priv64 = Vec::with_capacity(64);
-        priv64.extend_from_slice(&seed_bytes);
-        priv64.extend_from_slice(&pub_bytes);
-
         let checkint: u32 = 0x5343_4b59;
         let mut priv_section = Vec::new();
         priv_section.extend_from_slice(&checkint.to_be_bytes());
         priv_section.extend_from_slice(&checkint.to_be_bytes());
-        write_ssh_string(&mut priv_section, "ssh-ed25519");
-        write_ssh_bytes(&mut priv_section, &pub_bytes);
-        write_ssh_bytes(&mut priv_section, &priv64);
-        write_ssh_string(&mut priv_section, &self.public_key.comment);
+
+        match &self.inner {
+            PrivateKeyInner::Ed25519(signing_key) => {
+                let pub_bytes = signing_key.verifying_key().to_bytes();
+                let seed_bytes = signing_key.to_bytes();
+                let mut priv64 = Vec::with_capacity(64);
+                priv64.extend_from_slice(&seed_bytes);
+                priv64.extend_from_slice(&pub_bytes);
+
+                write_ssh_string(&mut priv_section, "ssh-ed25519");
+                write_ssh_bytes(&mut priv_section, &pub_bytes);
+                write_ssh_bytes(&mut priv_section, &priv64);
+                write_ssh_string(&mut priv_section, &self.public_key.comment);
+            }
+            PrivateKeyInner::Rsa(rsa_key) => {
+                rsa_key.write_openssh_private_fields(&mut priv_section, &self.public_key.comment);
+            }
+        }
 
         let mut pad_byte = 1u8;
         while priv_section.len() % 8 != 0 {
@@ -232,16 +276,21 @@ impl LoadedSshKey {
     }
 
     /// Signs `data` according to the SSH agent `SSH2_AGENTC_SIGN_REQUEST` specification
-    /// and returns the RFC 4253 signature blob (`string "ssh-ed25519" || string <64-byte-sig>`).
-    pub fn sign_ssh_data(&self, data: &[u8], _flags: u32) -> Result<Vec<u8>, SshKeyError> {
-        let sig: Signature = self.signing_key.sign(data);
-        let mut sig_blob = Vec::with_capacity(4 + 11 + 4 + 64);
-        write_ssh_string(&mut sig_blob, "ssh-ed25519");
-        write_ssh_bytes(&mut sig_blob, &sig.to_bytes());
-        Ok(sig_blob)
+    /// and returns the RFC 4253 / RFC 8332 signature blob.
+    pub fn sign_ssh_data(&self, data: &[u8], flags: u32) -> Result<Vec<u8>, SshKeyError> {
+        match &self.inner {
+            PrivateKeyInner::Ed25519(signing_key) => {
+                let sig: Signature = signing_key.sign(data);
+                let mut sig_blob = Vec::with_capacity(4 + 11 + 4 + 64);
+                write_ssh_string(&mut sig_blob, "ssh-ed25519");
+                write_ssh_bytes(&mut sig_blob, &sig.to_bytes());
+                Ok(sig_blob)
+            }
+            PrivateKeyInner::Rsa(rsa_key) => rsa_key.sign_ssh_data(data, flags),
+        }
     }
 
-    /// Verifies an RFC 4253 `ssh-ed25519` signature blob against `data`.
+    /// Verifies an RFC 4253 / RFC 8332 signature blob against `data`.
     pub fn verify_ssh_signature_blob(
         &self,
         data: &[u8],
@@ -251,21 +300,28 @@ impl LoadedSshKey {
         let algo = read_string(&mut cursor).ok_or_else(|| {
             SshKeyError::SignatureVerificationFailed("truncated signature algorithm".to_string())
         })?;
-        if algo != "ssh-ed25519" {
-            return Err(SshKeyError::SignatureVerificationFailed(format!(
-                "unexpected signature algorithm '{algo}'"
-            )));
-        }
         let raw_sig = read_bytes(&mut cursor).ok_or_else(|| {
             SshKeyError::SignatureVerificationFailed("truncated signature bytes".to_string())
         })?;
-        let sig = Signature::from_slice(raw_sig).map_err(|e| {
-            SshKeyError::SignatureVerificationFailed(format!("invalid ed25519 signature: {e}"))
-        })?;
-        self.signing_key
-            .verifying_key()
-            .verify(data, &sig)
-            .map_err(|e| SshKeyError::SignatureVerificationFailed(e.to_string()))
+        match &self.inner {
+            PrivateKeyInner::Ed25519(signing_key) => {
+                if algo != "ssh-ed25519" {
+                    return Err(SshKeyError::SignatureVerificationFailed(format!(
+                        "unexpected signature algorithm '{algo}'"
+                    )));
+                }
+                let sig = Signature::from_slice(raw_sig).map_err(|e| {
+                    SshKeyError::SignatureVerificationFailed(format!(
+                        "invalid ed25519 signature: {e}"
+                    ))
+                })?;
+                signing_key
+                    .verifying_key()
+                    .verify(data, &sig)
+                    .map_err(|e| SshKeyError::SignatureVerificationFailed(e.to_string()))
+            }
+            PrivateKeyInner::Rsa(rsa_key) => rsa_key.verify_ssh_signature(data, &algo, raw_sig),
+        }
     }
 }
 

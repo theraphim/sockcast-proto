@@ -6,6 +6,7 @@ pub mod bundle;
 pub mod crypto;
 pub(crate) mod openssh_cipher;
 pub mod p2p;
+pub(crate) mod rsa_ssh;
 pub mod ssh;
 pub mod wasm;
 
@@ -432,6 +433,61 @@ mod tests {
         loaded_chacha
             .verify_ssh_signature_blob(challenge, &sig_chacha)
             .unwrap();
+
+        // 2d. RSA key in OpenSSH format and PKCS#1 PEM format via ssh-keygen
+        let rsa_openssh_path = tmp_dir.join("id_rsa_openssh");
+        let status = std::process::Command::new("ssh-keygen")
+            .args([
+                "-q",
+                "-t",
+                "rsa",
+                "-b",
+                "2048",
+                "-N",
+                "",
+                "-C",
+                "rsa-openssh@test",
+                "-f",
+                rsa_openssh_path.to_str().unwrap(),
+            ])
+            .status()
+            .unwrap();
+        assert!(status.success());
+        let rsa_openssh_pem = std::fs::read_to_string(&rsa_openssh_path).unwrap();
+        let loaded_rsa1 = LoadedSshKey::parse_openssh_pem(&rsa_openssh_pem, None).unwrap();
+        assert_eq!(loaded_rsa1.key_type(), "ssh-rsa");
+        assert_eq!(loaded_rsa1.comment(), "rsa-openssh@test");
+        for flags in [0u32, 2u32, 4u32] {
+            let sig = loaded_rsa1.sign_ssh_data(challenge, flags).unwrap();
+            loaded_rsa1.verify_ssh_signature_blob(challenge, &sig).unwrap();
+        }
+
+        let rsa_pem_path = tmp_dir.join("id_rsa_pem");
+        let status = std::process::Command::new("ssh-keygen")
+            .args([
+                "-q",
+                "-t",
+                "rsa",
+                "-b",
+                "2048",
+                "-m",
+                "PEM",
+                "-N",
+                "",
+                "-C",
+                "rsa-pem@test",
+                "-f",
+                rsa_pem_path.to_str().unwrap(),
+            ])
+            .status()
+            .unwrap();
+        assert!(status.success());
+        let rsa_classic_pem = std::fs::read_to_string(&rsa_pem_path).unwrap();
+        assert!(rsa_classic_pem.contains("BEGIN RSA PRIVATE KEY"));
+        let loaded_rsa2 = LoadedSshKey::parse_openssh_pem(&rsa_classic_pem, None).unwrap();
+        assert_eq!(loaded_rsa2.key_type(), "ssh-rsa");
+        let sig_rsa2 = loaded_rsa2.sign_ssh_data(challenge, 4).unwrap();
+        loaded_rsa2.verify_ssh_signature_blob(challenge, &sig_rsa2).unwrap();
 
         let _ = std::fs::remove_dir_all(&tmp_dir);
     }
