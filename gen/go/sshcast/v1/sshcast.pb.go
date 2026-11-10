@@ -138,6 +138,7 @@ type NodeGrant struct {
 	IssuedAtUnixSec  uint64                 `protobuf:"varint,6,opt,name=issued_at_unix_sec,json=issuedAtUnixSec,proto3" json:"issued_at_unix_sec,omitempty"`
 	ExpiresAtUnixSec uint64                 `protobuf:"varint,7,opt,name=expires_at_unix_sec,json=expiresAtUnixSec,proto3" json:"expires_at_unix_sec,omitempty"`
 	UserSignature    []byte                 `protobuf:"bytes,8,opt,name=user_signature,json=userSignature,proto3" json:"user_signature,omitempty"`
+	UserCert         *UserCert              `protobuf:"bytes,9,opt,name=user_cert,json=userCert,proto3" json:"user_cert,omitempty"`
 	unknownFields    protoimpl.UnknownFields
 	sizeCache        protoimpl.SizeCache
 }
@@ -224,6 +225,97 @@ func (x *NodeGrant) GetExpiresAtUnixSec() uint64 {
 func (x *NodeGrant) GetUserSignature() []byte {
 	if x != nil {
 		return x.UserSignature
+	}
+	return nil
+}
+
+func (x *NodeGrant) GetUserCert() *UserCert {
+	if x != nil {
+		return x.UserCert
+	}
+	return nil
+}
+
+type UserCert struct {
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	UserId            string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	UserPubkey        []byte                 `protobuf:"bytes,2,opt,name=user_pubkey,json=userPubkey,proto3" json:"user_pubkey,omitempty"`
+	OperatorPubkey    []byte                 `protobuf:"bytes,3,opt,name=operator_pubkey,json=operatorPubkey,proto3" json:"operator_pubkey,omitempty"`
+	IssuedAtUnixSec   uint64                 `protobuf:"varint,4,opt,name=issued_at_unix_sec,json=issuedAtUnixSec,proto3" json:"issued_at_unix_sec,omitempty"`
+	ExpiresAtUnixSec  uint64                 `protobuf:"varint,5,opt,name=expires_at_unix_sec,json=expiresAtUnixSec,proto3" json:"expires_at_unix_sec,omitempty"`
+	OperatorSignature []byte                 `protobuf:"bytes,6,opt,name=operator_signature,json=operatorSignature,proto3" json:"operator_signature,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *UserCert) Reset() {
+	*x = UserCert{}
+	mi := &file_sshcast_v1_sshcast_proto_msgTypes[21]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UserCert) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UserCert) ProtoMessage() {}
+
+func (x *UserCert) ProtoReflect() protoreflect.Message {
+	mi := &file_sshcast_v1_sshcast_proto_msgTypes[21]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UserCert.ProtoReflect.Descriptor instead.
+func (*UserCert) Descriptor() ([]byte, []int) {
+	return file_sshcast_v1_sshcast_proto_rawDescGZIP(), []int{21}
+}
+
+func (x *UserCert) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *UserCert) GetUserPubkey() []byte {
+	if x != nil {
+		return x.UserPubkey
+	}
+	return nil
+}
+
+func (x *UserCert) GetOperatorPubkey() []byte {
+	if x != nil {
+		return x.OperatorPubkey
+	}
+	return nil
+}
+
+func (x *UserCert) GetIssuedAtUnixSec() uint64 {
+	if x != nil {
+		return x.IssuedAtUnixSec
+	}
+	return 0
+}
+
+func (x *UserCert) GetExpiresAtUnixSec() uint64 {
+	if x != nil {
+		return x.ExpiresAtUnixSec
+	}
+	return 0
+}
+
+func (x *UserCert) GetOperatorSignature() []byte {
+	if x != nil {
+		return x.OperatorSignature
 	}
 	return nil
 }
@@ -1782,7 +1874,7 @@ func (*ServerStreamMessage_ZellijFrame) isServerStreamMessage_Payload() {}
 
 var File_sshcast_v1_sshcast_proto protoreflect.FileDescriptor
 
-const file_sshcast_v1_sshcast_proto_rawDesc = "\n\x18sshcast/v1/sshcast.proto\x12\nsshcast.v1\"\xac\x02\n\tNodeGrant\x12\x17\n\auser_id\x18\x01 \x01(\tR\x06userId\x12\x1f\n\vuser_pubkey\x18\x02 \x01(\fR\nuserPubkey\x12\x17\n\anode_id\x18\x03 \x01(\tR\x06nodeId\x12(\n\x04role\x18\x04 \x01(\x0e2\x14.sshcast.v1.NodeRoleR\x04role\x12\x1f\n\vnode_pubkey\x18\x05 \x01(\fR\nnodePubkey\x12+\n\x12issued_at_unix_sec\x18\x06 \x01(\x04R\x0fissuedAtUnixSec\x12-\n\x13expires_at_unix_sec\x18\a \x01(\x04R\x10expiresAtUnixSec\x12%\n\x0euser_signature\x18\b \x01(\fR\ruserSignature\"\xa0\x01\n\bNodeAuth\x12+\n\x05grant\x18\x01 \x01(\v2\x15.sshcast.v1.NodeGrantR\x05grant\x12*\n\x11timestamp_unix_ms\x18\x02 \x01(\x04R\x0ftimestampUnixMs\x12\x14\n\x05nonce\x18\x03 \x01(\fR\x05nonce\x12%\n\x0enode_signature\x18\x04 \x01(\fR\rnodeSignature\"\x8a\x01\n\tPublicKey\x12\x19\n\bkey_blob\x18\x01 \x01(\fR\akeyBlob\x12\x18\n\acomment\x18\x02 \x01(\tR\acomment\x12-\n\x12fingerprint_sha256\x18\x03 \x01(\tR\x11fingerprintSha256\x12\x19\n\bkey_type\x18\x04 \x01(\tR\akeyType\"Q\n\x0fProcessAncestor\x12\x10\n\x03pid\x18\x01 \x01(\rR\x03pid\x12\x12\n\x04comm\x18\x02 \x01(\tR\x04comm\x12\x18\n\acmdline\x18\x03 \x01(\tR\acmdline\"\xcb\x01\n\x0eProcessContext\x12\x1a\n\bhostname\x18\x01 \x01(\tR\bhostname\x12\x10\n\x03uid\x18\x02 \x01(\rR\x03uid\x12\x10\n\x03pid\x18\x03 \x01(\rR\x03pid\x12\x12\n\x04comm\x18\x04 \x01(\tR\x04comm\x12\x18\n\acmdline\x18\x05 \x01(\tR\acmdline\x12\x10\n\x03cwd\x18\x06 \x01(\tR\x03cwd\x129\n\tancestors\x18\a \x03(\v2\x1b.sshcast.v1.ProcessAncestorR\tancestors\"\xd6\x01\n\x0eSshAuthContext\x12.\n\x13is_userauth_request\x18\x01 \x01(\bR\x11isUserauthRequest\x12'\n\x0ftarget_username\x18\x02 \x01(\tR\x0etargetUsername\x12!\n\fservice_name\x18\x03 \x01(\tR\vserviceName\x12)\n\x10pubkey_algorithm\x18\x04 \x01(\tR\x0fpubkeyAlgorithm\x12\x1d\n\nsession_id\x18\x05 \x01(\fR\tsessionId\"@\n\x14GetIdentitiesRequest\x12(\n\x04auth\x18\x01 \x01(\v2\x14.sshcast.v1.NodeAuthR\x04auth\"B\n\x15GetIdentitiesResponse\x12)\n\x04keys\x18\x01 \x03(\v2\x15.sshcast.v1.PublicKeyR\x04keys\"\xb3\x03\n\vSignRequest\x12\x1d\n\nrequest_id\x18\x01 \x01(\tR\trequestId\x12*\n\x11timestamp_unix_ms\x18\x02 \x01(\x04R\x0ftimestampUnixMs\x12\x19\n\bkey_blob\x18\x03 \x01(\fR\akeyBlob\x12\x12\n\x04data\x18\x04 \x01(\fR\x04data\x12\x14\n\x05flags\x18\x05 \x01(\rR\x05flags\x12C\n\x0fprocess_context\x18\x06 \x01(\v2\x1a.sshcast.v1.ProcessContextR\x0eprocessContext\x12D\n\x10ssh_auth_context\x18\a \x01(\v2\x1a.sshcast.v1.SshAuthContextR\x0esshAuthContext\x126\n\vrelay_grant\x18\b \x01(\v2\x15.sshcast.v1.NodeGrantR\nrelayGrant\x12'\n\x0frelay_signature\x18\t \x01(\fR\x0erelaySignature\x12(\n\x04auth\x18\n \x01(\v2\x14.sshcast.v1.NodeAuthR\x04auth\"\xc2\x01\n\fSignResponse\x12\x1d\n\nrequest_id\x18\x01 \x01(\tR\trequestId\x12\x1a\n\bapproved\x18\x02 \x01(\bR\bapproved\x12%\n\x0esignature_blob\x18\x03 \x01(\fR\rsignatureBlob\x12#\n\rerror_message\x18\x04 \x01(\tR\ferrorMessage\x12+\n\x12handled_by_node_id\x18\x05 \x01(\tR\x0fhandledByNodeId\"\xa0\x01\n\x11WorkstationStatus\x12-\n\x13last_input_epoch_ms\x18\x01 \x01(\x04R\x10lastInputEpochMs\x12!\n\fforce_active\x18\x02 \x01(\bR\vforceActive\x12\x0e\n\x02os\x18\x03 \x01(\tR\x02os\x12)\n\x04keys\x18\x04 \x03(\v2\x15.sshcast.v1.PublicKeyR\x04keys\"(\n\aSignAck\x12\x1d\n\nrequest_id\x18\x01 \x01(\tR\trequestId\"J\n\x11CancelSignRequest\x12\x1d\n\nrequest_id\x18\x01 \x01(\tR\trequestId\x12\x16\n\x06reason\x18\x02 \x01(\tR\x06reason\"b\n\x11ZellijSessionInfo\x12\x12\n\x04name\x18\x01 \x01(\tR\x04name\x12!\n\fcreated_info\x18\x02 \x01(\tR\vcreatedInfo\x12\x16\n\x06exited\x18\x03 \x01(\bR\x06exited\"\xbb\x01\n\x11RelayZellijStatus\x12\x17\n\anode_id\x18\x01 \x01(\tR\x06nodeId\x12%\n\x0ezellij_enabled\x18\x02 \x01(\bR\rzellijEnabled\x129\n\bsessions\x18\x03 \x03(\v2\x1d.sshcast.v1.ZellijSessionInfoR\bsessions\x12+\n\x12updated_at_unix_ms\x18\x04 \x01(\x04R\x0fupdatedAtUnixMs\"E\n\x0eZellijHostList\x123\n\x05hosts\x18\x01 \x03(\v2\x1d.sshcast.v1.RelayZellijStatusR\x05hosts\"\xda\x02\n\x11ZellijTunnelFrame\x12\x1b\n\ttunnel_id\x18\x01 \x01(\tR\btunnelId\x12\"\n\rrelay_node_id\x18\x02 \x01(\tR\vrelayNodeId\x12$\n\x0eclient_node_id\x18\x03 \x01(\tR\fclientNodeId\x12:\n\nframe_type\x18\x04 \x01(\x0e2\x1b.sshcast.v1.ZellijFrameTypeR\tframeType\x12\x18\n\apayload\x18\x05 \x01(\fR\apayload\x12#\n\rerror_message\x18\x06 \x01(\tR\ferrorMessage\x128\n\fsender_grant\x18\a \x01(\v2\x15.sshcast.v1.NodeGrantR\vsenderGrant\x12)\n\x10sender_signature\x18\b \x01(\fR\x0fsenderSignature\"\xe8\x01\n\x12RelayStreamMessage\x12=\n\x0eauth_handshake\x18\x01 \x01(\v2\x14.sshcast.v1.NodeAuthH\x00R\rauthHandshake\x12D\n\rzellij_status\x18\x02 \x01(\v2\x1d.sshcast.v1.RelayZellijStatusH\x00R\fzellijStatus\x12B\n\fzellij_frame\x18\x03 \x01(\v2\x1d.sshcast.v1.ZellijTunnelFrameH\x00R\vzellijFrameB\t\n\apayload\"\xcf\x01\n\x14ServerToRelayMessage\x12;\n\x19server_heartbeat_epoch_ms\x18\x01 \x01(\x04H\x00R\x16serverHeartbeatEpochMs\x12+\n\x10refresh_sessions\x18\x02 \x01(\bH\x00R\x0frefreshSessions\x12B\n\fzellij_frame\x18\x03 \x01(\v2\x1d.sshcast.v1.ZellijTunnelFrameH\x00R\vzellijFrameB\t\n\apayload\"\x83\x03\n\x13ClientStreamMessage\x12=\n\x0eauth_handshake\x18\x01 \x01(\v2\x14.sshcast.v1.NodeAuthH\x00R\rauthHandshake\x127\n\x06status\x18\x02 \x01(\v2\x1d.sshcast.v1.WorkstationStatusH\x00R\x06status\x120\n\bsign_ack\x18\x03 \x01(\v2\x13.sshcast.v1.SignAckH\x00R\asignAck\x12?\n\rsign_response\x18\x04 \x01(\v2\x18.sshcast.v1.SignResponseH\x00R\fsignResponse\x122\n\x14request_zellij_hosts\x18\x05 \x01(\bH\x00R\x12requestZellijHosts\x12B\n\fzellij_frame\x18\x06 \x01(\v2\x1d.sshcast.v1.ZellijTunnelFrameH\x00R\vzellijFrameB\t\n\apayload\"\xf8\x02\n\x13ServerStreamMessage\x12<\n\fsign_request\x18\x01 \x01(\v2\x17.sshcast.v1.SignRequestH\x00R\vsignRequest\x12O\n\x13cancel_sign_request\x18\x02 \x01(\v2\x1d.sshcast.v1.CancelSignRequestH\x00R\x11cancelSignRequest\x12;\n\x19server_heartbeat_epoch_ms\x18\x03 \x01(\x04H\x00R\x16serverHeartbeatEpochMs\x12F\n\x10zellij_host_list\x18\x04 \x01(\v2\x1a.sshcast.v1.ZellijHostListH\x00R\x0ezellijHostList\x12B\n\fzellij_frame\x18\x05 \x01(\v2\x1d.sshcast.v1.ZellijTunnelFrameH\x00R\vzellijFrameB\t\n\apayload*P\n\bNodeRole\x12\x19\n\x15NODE_ROLE_UNSPECIFIED\x10\x00\x12\x13\n\x0fNODE_ROLE_RELAY\x10\x01\x12\x14\n\x10NODE_ROLE_CLIENT\x10\x02*\xcc\x01\n\x0fZellijFrameType\x12!\n\x1dZELLIJ_FRAME_TYPE_UNSPECIFIED\x10\x00\x12\x1a\n\x16ZELLIJ_FRAME_TYPE_OPEN\x10\x01\x12\x1a\n\x16ZELLIJ_FRAME_TYPE_DATA\x10\x02\x12\x1b\n\x17ZELLIJ_FRAME_TYPE_CLOSE\x10\x03\x12\x1f\n\x1bZELLIJ_FRAME_TYPE_P2P_OFFER\x10\x04\x12 \n\x1cZELLIJ_FRAME_TYPE_P2P_ANSWER\x10\x052\xd3\x02\n\x0eSshcastService\x12T\n\rGetIdentities\x12 .sshcast.v1.GetIdentitiesRequest\x1a!.sshcast.v1.GetIdentitiesResponse\x129\n\x04Sign\x12\x17.sshcast.v1.SignRequest\x1a\x18.sshcast.v1.SignResponse\x12Z\n\x12ConnectWorkstation\x12\x1f.sshcast.v1.ClientStreamMessage\x1a\x1f.sshcast.v1.ServerStreamMessage(\x010\x01\x12T\n\fConnectRelay\x12\x1e.sshcast.v1.RelayStreamMessage\x1a .sshcast.v1.ServerToRelayMessage(\x010\x01B9Z7stingr.net/go/sshcast-proto/gen/go/sshcast/v1;sshcastv1b\x06proto3"
+const file_sshcast_v1_sshcast_proto_rawDesc = "\n\x18sshcast/v1/sshcast.proto\x12\nsshcast.v1\"\xdf\x02\n\tNodeGrant\x12\x17\n\auser_id\x18\x01 \x01(\tR\x06userId\x12\x1f\n\vuser_pubkey\x18\x02 \x01(\fR\nuserPubkey\x12\x17\n\anode_id\x18\x03 \x01(\tR\x06nodeId\x12(\n\x04role\x18\x04 \x01(\x0e2\x14.sshcast.v1.NodeRoleR\x04role\x12\x1f\n\vnode_pubkey\x18\x05 \x01(\fR\nnodePubkey\x12+\n\x12issued_at_unix_sec\x18\x06 \x01(\x04R\x0fissuedAtUnixSec\x12-\n\x13expires_at_unix_sec\x18\a \x01(\x04R\x10expiresAtUnixSec\x12%\n\x0euser_signature\x18\b \x01(\fR\ruserSignature\x121\n\tuser_cert\x18\t \x01(\v2\x14.sshcast.v1.UserCertR\buserCert\"\xa0\x01\n\bNodeAuth\x12+\n\x05grant\x18\x01 \x01(\v2\x15.sshcast.v1.NodeGrantR\x05grant\x12*\n\x11timestamp_unix_ms\x18\x02 \x01(\x04R\x0ftimestampUnixMs\x12\x14\n\x05nonce\x18\x03 \x01(\fR\x05nonce\x12%\n\x0enode_signature\x18\x04 \x01(\fR\rnodeSignature\"\x8a\x01\n\tPublicKey\x12\x19\n\bkey_blob\x18\x01 \x01(\fR\akeyBlob\x12\x18\n\acomment\x18\x02 \x01(\tR\acomment\x12-\n\x12fingerprint_sha256\x18\x03 \x01(\tR\x11fingerprintSha256\x12\x19\n\bkey_type\x18\x04 \x01(\tR\akeyType\"Q\n\x0fProcessAncestor\x12\x10\n\x03pid\x18\x01 \x01(\rR\x03pid\x12\x12\n\x04comm\x18\x02 \x01(\tR\x04comm\x12\x18\n\acmdline\x18\x03 \x01(\tR\acmdline\"\xcb\x01\n\x0eProcessContext\x12\x1a\n\bhostname\x18\x01 \x01(\tR\bhostname\x12\x10\n\x03uid\x18\x02 \x01(\rR\x03uid\x12\x10\n\x03pid\x18\x03 \x01(\rR\x03pid\x12\x12\n\x04comm\x18\x04 \x01(\tR\x04comm\x12\x18\n\acmdline\x18\x05 \x01(\tR\acmdline\x12\x10\n\x03cwd\x18\x06 \x01(\tR\x03cwd\x129\n\tancestors\x18\a \x03(\v2\x1b.sshcast.v1.ProcessAncestorR\tancestors\"\xd6\x01\n\x0eSshAuthContext\x12.\n\x13is_userauth_request\x18\x01 \x01(\bR\x11isUserauthRequest\x12'\n\x0ftarget_username\x18\x02 \x01(\tR\x0etargetUsername\x12!\n\fservice_name\x18\x03 \x01(\tR\vserviceName\x12)\n\x10pubkey_algorithm\x18\x04 \x01(\tR\x0fpubkeyAlgorithm\x12\x1d\n\nsession_id\x18\x05 \x01(\fR\tsessionId\"@\n\x14GetIdentitiesRequest\x12(\n\x04auth\x18\x01 \x01(\v2\x14.sshcast.v1.NodeAuthR\x04auth\"B\n\x15GetIdentitiesResponse\x12)\n\x04keys\x18\x01 \x03(\v2\x15.sshcast.v1.PublicKeyR\x04keys\"\xb3\x03\n\vSignRequest\x12\x1d\n\nrequest_id\x18\x01 \x01(\tR\trequestId\x12*\n\x11timestamp_unix_ms\x18\x02 \x01(\x04R\x0ftimestampUnixMs\x12\x19\n\bkey_blob\x18\x03 \x01(\fR\akeyBlob\x12\x12\n\x04data\x18\x04 \x01(\fR\x04data\x12\x14\n\x05flags\x18\x05 \x01(\rR\x05flags\x12C\n\x0fprocess_context\x18\x06 \x01(\v2\x1a.sshcast.v1.ProcessContextR\x0eprocessContext\x12D\n\x10ssh_auth_context\x18\a \x01(\v2\x1a.sshcast.v1.SshAuthContextR\x0esshAuthContext\x126\n\vrelay_grant\x18\b \x01(\v2\x15.sshcast.v1.NodeGrantR\nrelayGrant\x12'\n\x0frelay_signature\x18\t \x01(\fR\x0erelaySignature\x12(\n\x04auth\x18\n \x01(\v2\x14.sshcast.v1.NodeAuthR\x04auth\"\xc2\x01\n\fSignResponse\x12\x1d\n\nrequest_id\x18\x01 \x01(\tR\trequestId\x12\x1a\n\bapproved\x18\x02 \x01(\bR\bapproved\x12%\n\x0esignature_blob\x18\x03 \x01(\fR\rsignatureBlob\x12#\n\rerror_message\x18\x04 \x01(\tR\ferrorMessage\x12+\n\x12handled_by_node_id\x18\x05 \x01(\tR\x0fhandledByNodeId\"\xa0\x01\n\x11WorkstationStatus\x12-\n\x13last_input_epoch_ms\x18\x01 \x01(\x04R\x10lastInputEpochMs\x12!\n\fforce_active\x18\x02 \x01(\bR\vforceActive\x12\x0e\n\x02os\x18\x03 \x01(\tR\x02os\x12)\n\x04keys\x18\x04 \x03(\v2\x15.sshcast.v1.PublicKeyR\x04keys\"(\n\aSignAck\x12\x1d\n\nrequest_id\x18\x01 \x01(\tR\trequestId\"J\n\x11CancelSignRequest\x12\x1d\n\nrequest_id\x18\x01 \x01(\tR\trequestId\x12\x16\n\x06reason\x18\x02 \x01(\tR\x06reason\"b\n\x11ZellijSessionInfo\x12\x12\n\x04name\x18\x01 \x01(\tR\x04name\x12!\n\fcreated_info\x18\x02 \x01(\tR\vcreatedInfo\x12\x16\n\x06exited\x18\x03 \x01(\bR\x06exited\"\xbb\x01\n\x11RelayZellijStatus\x12\x17\n\anode_id\x18\x01 \x01(\tR\x06nodeId\x12%\n\x0ezellij_enabled\x18\x02 \x01(\bR\rzellijEnabled\x129\n\bsessions\x18\x03 \x03(\v2\x1d.sshcast.v1.ZellijSessionInfoR\bsessions\x12+\n\x12updated_at_unix_ms\x18\x04 \x01(\x04R\x0fupdatedAtUnixMs\"E\n\x0eZellijHostList\x123\n\x05hosts\x18\x01 \x03(\v2\x1d.sshcast.v1.RelayZellijStatusR\x05hosts\"\xda\x02\n\x11ZellijTunnelFrame\x12\x1b\n\ttunnel_id\x18\x01 \x01(\tR\btunnelId\x12\"\n\rrelay_node_id\x18\x02 \x01(\tR\vrelayNodeId\x12$\n\x0eclient_node_id\x18\x03 \x01(\tR\fclientNodeId\x12:\n\nframe_type\x18\x04 \x01(\x0e2\x1b.sshcast.v1.ZellijFrameTypeR\tframeType\x12\x18\n\apayload\x18\x05 \x01(\fR\apayload\x12#\n\rerror_message\x18\x06 \x01(\tR\ferrorMessage\x128\n\fsender_grant\x18\a \x01(\v2\x15.sshcast.v1.NodeGrantR\vsenderGrant\x12)\n\x10sender_signature\x18\b \x01(\fR\x0fsenderSignature\"\xe8\x01\n\x12RelayStreamMessage\x12=\n\x0eauth_handshake\x18\x01 \x01(\v2\x14.sshcast.v1.NodeAuthH\x00R\rauthHandshake\x12D\n\rzellij_status\x18\x02 \x01(\v2\x1d.sshcast.v1.RelayZellijStatusH\x00R\fzellijStatus\x12B\n\fzellij_frame\x18\x03 \x01(\v2\x1d.sshcast.v1.ZellijTunnelFrameH\x00R\vzellijFrameB\t\n\apayload\"\xcf\x01\n\x14ServerToRelayMessage\x12;\n\x19server_heartbeat_epoch_ms\x18\x01 \x01(\x04H\x00R\x16serverHeartbeatEpochMs\x12+\n\x10refresh_sessions\x18\x02 \x01(\bH\x00R\x0frefreshSessions\x12B\n\fzellij_frame\x18\x03 \x01(\v2\x1d.sshcast.v1.ZellijTunnelFrameH\x00R\vzellijFrameB\t\n\apayload\"\x83\x03\n\x13ClientStreamMessage\x12=\n\x0eauth_handshake\x18\x01 \x01(\v2\x14.sshcast.v1.NodeAuthH\x00R\rauthHandshake\x127\n\x06status\x18\x02 \x01(\v2\x1d.sshcast.v1.WorkstationStatusH\x00R\x06status\x120\n\bsign_ack\x18\x03 \x01(\v2\x13.sshcast.v1.SignAckH\x00R\asignAck\x12?\n\rsign_response\x18\x04 \x01(\v2\x18.sshcast.v1.SignResponseH\x00R\fsignResponse\x122\n\x14request_zellij_hosts\x18\x05 \x01(\bH\x00R\x12requestZellijHosts\x12B\n\fzellij_frame\x18\x06 \x01(\v2\x1d.sshcast.v1.ZellijTunnelFrameH\x00R\vzellijFrameB\t\n\apayload\"\xf8\x02\n\x13ServerStreamMessage\x12<\n\fsign_request\x18\x01 \x01(\v2\x17.sshcast.v1.SignRequestH\x00R\vsignRequest\x12O\n\x13cancel_sign_request\x18\x02 \x01(\v2\x1d.sshcast.v1.CancelSignRequestH\x00R\x11cancelSignRequest\x12;\n\x19server_heartbeat_epoch_ms\x18\x03 \x01(\x04H\x00R\x16serverHeartbeatEpochMs\x12F\n\x10zellij_host_list\x18\x04 \x01(\v2\x1a.sshcast.v1.ZellijHostListH\x00R\x0ezellijHostList\x12B\n\fzellij_frame\x18\x05 \x01(\v2\x1d.sshcast.v1.ZellijTunnelFrameH\x00R\vzellijFrameB\t\n\apayload\"\xf8\x01\n\bUserCert\x12\x17\n\auser_id\x18\x01 \x01(\tR\x06userId\x12\x1f\n\vuser_pubkey\x18\x02 \x01(\fR\nuserPubkey\x12'\n\x0foperator_pubkey\x18\x03 \x01(\fR\x0eoperatorPubkey\x12+\n\x12issued_at_unix_sec\x18\x04 \x01(\x04R\x0fissuedAtUnixSec\x12-\n\x13expires_at_unix_sec\x18\x05 \x01(\x04R\x10expiresAtUnixSec\x12-\n\x12operator_signature\x18\x06 \x01(\fR\x11operatorSignature*P\n\bNodeRole\x12\x19\n\x15NODE_ROLE_UNSPECIFIED\x10\x00\x12\x13\n\x0fNODE_ROLE_RELAY\x10\x01\x12\x14\n\x10NODE_ROLE_CLIENT\x10\x02*\xcc\x01\n\x0fZellijFrameType\x12!\n\x1dZELLIJ_FRAME_TYPE_UNSPECIFIED\x10\x00\x12\x1a\n\x16ZELLIJ_FRAME_TYPE_OPEN\x10\x01\x12\x1a\n\x16ZELLIJ_FRAME_TYPE_DATA\x10\x02\x12\x1b\n\x17ZELLIJ_FRAME_TYPE_CLOSE\x10\x03\x12\x1f\n\x1bZELLIJ_FRAME_TYPE_P2P_OFFER\x10\x04\x12 \n\x1cZELLIJ_FRAME_TYPE_P2P_ANSWER\x10\x052\xd3\x02\n\x0eSshcastService\x12T\n\rGetIdentities\x12 .sshcast.v1.GetIdentitiesRequest\x1a!.sshcast.v1.GetIdentitiesResponse\x129\n\x04Sign\x12\x17.sshcast.v1.SignRequest\x1a\x18.sshcast.v1.SignResponse\x12Z\n\x12ConnectWorkstation\x12\x1f.sshcast.v1.ClientStreamMessage\x1a\x1f.sshcast.v1.ServerStreamMessage(\x010\x01\x12T\n\fConnectRelay\x12\x1e.sshcast.v1.RelayStreamMessage\x1a .sshcast.v1.ServerToRelayMessage(\x010\x01B9Z7stingr.net/go/sshcast-proto/gen/go/sshcast/v1;sshcastv1b\x06proto3"
 
 var (
 	file_sshcast_v1_sshcast_proto_rawDescOnce sync.Once
@@ -1797,7 +1889,7 @@ func file_sshcast_v1_sshcast_proto_rawDescGZIP() []byte {
 }
 
 var file_sshcast_v1_sshcast_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_sshcast_v1_sshcast_proto_msgTypes = make([]protoimpl.MessageInfo, 21)
+var file_sshcast_v1_sshcast_proto_msgTypes = make([]protoimpl.MessageInfo, 22)
 var file_sshcast_v1_sshcast_proto_goTypes = []any{
 	(NodeRole)(0),                 // 0: sshcast.v1.NodeRole
 	(ZellijFrameType)(0),          // 1: sshcast.v1.ZellijFrameType
@@ -1822,48 +1914,50 @@ var file_sshcast_v1_sshcast_proto_goTypes = []any{
 	(*ServerToRelayMessage)(nil),  // 20: sshcast.v1.ServerToRelayMessage
 	(*ClientStreamMessage)(nil),   // 21: sshcast.v1.ClientStreamMessage
 	(*ServerStreamMessage)(nil),   // 22: sshcast.v1.ServerStreamMessage
+	(*UserCert)(nil),              // 23: sshcast.v1.UserCert
 }
 var file_sshcast_v1_sshcast_proto_depIdxs = []int32{
 	0,  // 0: sshcast.v1.NodeGrant.role:type_name -> sshcast.v1.NodeRole
-	2,  // 1: sshcast.v1.NodeAuth.grant:type_name -> sshcast.v1.NodeGrant
-	5,  // 2: sshcast.v1.ProcessContext.ancestors:type_name -> sshcast.v1.ProcessAncestor
-	3,  // 3: sshcast.v1.GetIdentitiesRequest.auth:type_name -> sshcast.v1.NodeAuth
-	4,  // 4: sshcast.v1.GetIdentitiesResponse.keys:type_name -> sshcast.v1.PublicKey
-	6,  // 5: sshcast.v1.SignRequest.process_context:type_name -> sshcast.v1.ProcessContext
-	7,  // 6: sshcast.v1.SignRequest.ssh_auth_context:type_name -> sshcast.v1.SshAuthContext
-	2,  // 7: sshcast.v1.SignRequest.relay_grant:type_name -> sshcast.v1.NodeGrant
-	3,  // 8: sshcast.v1.SignRequest.auth:type_name -> sshcast.v1.NodeAuth
-	4,  // 9: sshcast.v1.WorkstationStatus.keys:type_name -> sshcast.v1.PublicKey
-	15, // 10: sshcast.v1.RelayZellijStatus.sessions:type_name -> sshcast.v1.ZellijSessionInfo
-	16, // 11: sshcast.v1.ZellijHostList.hosts:type_name -> sshcast.v1.RelayZellijStatus
-	1,  // 12: sshcast.v1.ZellijTunnelFrame.frame_type:type_name -> sshcast.v1.ZellijFrameType
-	2,  // 13: sshcast.v1.ZellijTunnelFrame.sender_grant:type_name -> sshcast.v1.NodeGrant
-	3,  // 14: sshcast.v1.RelayStreamMessage.auth_handshake:type_name -> sshcast.v1.NodeAuth
-	16, // 15: sshcast.v1.RelayStreamMessage.zellij_status:type_name -> sshcast.v1.RelayZellijStatus
-	18, // 16: sshcast.v1.RelayStreamMessage.zellij_frame:type_name -> sshcast.v1.ZellijTunnelFrame
-	18, // 17: sshcast.v1.ServerToRelayMessage.zellij_frame:type_name -> sshcast.v1.ZellijTunnelFrame
-	3,  // 18: sshcast.v1.ClientStreamMessage.auth_handshake:type_name -> sshcast.v1.NodeAuth
-	12, // 19: sshcast.v1.ClientStreamMessage.status:type_name -> sshcast.v1.WorkstationStatus
-	13, // 20: sshcast.v1.ClientStreamMessage.sign_ack:type_name -> sshcast.v1.SignAck
-	11, // 21: sshcast.v1.ClientStreamMessage.sign_response:type_name -> sshcast.v1.SignResponse
-	18, // 22: sshcast.v1.ClientStreamMessage.zellij_frame:type_name -> sshcast.v1.ZellijTunnelFrame
-	10, // 23: sshcast.v1.ServerStreamMessage.sign_request:type_name -> sshcast.v1.SignRequest
-	14, // 24: sshcast.v1.ServerStreamMessage.cancel_sign_request:type_name -> sshcast.v1.CancelSignRequest
-	17, // 25: sshcast.v1.ServerStreamMessage.zellij_host_list:type_name -> sshcast.v1.ZellijHostList
-	18, // 26: sshcast.v1.ServerStreamMessage.zellij_frame:type_name -> sshcast.v1.ZellijTunnelFrame
-	8,  // 27: sshcast.v1.SshcastService.GetIdentities:input_type -> sshcast.v1.GetIdentitiesRequest
-	10, // 28: sshcast.v1.SshcastService.Sign:input_type -> sshcast.v1.SignRequest
-	21, // 29: sshcast.v1.SshcastService.ConnectWorkstation:input_type -> sshcast.v1.ClientStreamMessage
-	19, // 30: sshcast.v1.SshcastService.ConnectRelay:input_type -> sshcast.v1.RelayStreamMessage
-	9,  // 31: sshcast.v1.SshcastService.GetIdentities:output_type -> sshcast.v1.GetIdentitiesResponse
-	11, // 32: sshcast.v1.SshcastService.Sign:output_type -> sshcast.v1.SignResponse
-	22, // 33: sshcast.v1.SshcastService.ConnectWorkstation:output_type -> sshcast.v1.ServerStreamMessage
-	20, // 34: sshcast.v1.SshcastService.ConnectRelay:output_type -> sshcast.v1.ServerToRelayMessage
-	31, // [31:35] is the sub-list for method output_type
-	27, // [27:31] is the sub-list for method input_type
-	27, // [27:27] is the sub-list for extension type_name
-	27, // [27:27] is the sub-list for extension extendee
-	0,  // [0:27] is the sub-list for field type_name
+	23, // 1: sshcast.v1.NodeGrant.user_cert:type_name -> sshcast.v1.UserCert
+	2,  // 2: sshcast.v1.NodeAuth.grant:type_name -> sshcast.v1.NodeGrant
+	5,  // 3: sshcast.v1.ProcessContext.ancestors:type_name -> sshcast.v1.ProcessAncestor
+	3,  // 4: sshcast.v1.GetIdentitiesRequest.auth:type_name -> sshcast.v1.NodeAuth
+	4,  // 5: sshcast.v1.GetIdentitiesResponse.keys:type_name -> sshcast.v1.PublicKey
+	6,  // 6: sshcast.v1.SignRequest.process_context:type_name -> sshcast.v1.ProcessContext
+	7,  // 7: sshcast.v1.SignRequest.ssh_auth_context:type_name -> sshcast.v1.SshAuthContext
+	2,  // 8: sshcast.v1.SignRequest.relay_grant:type_name -> sshcast.v1.NodeGrant
+	3,  // 9: sshcast.v1.SignRequest.auth:type_name -> sshcast.v1.NodeAuth
+	4,  // 10: sshcast.v1.WorkstationStatus.keys:type_name -> sshcast.v1.PublicKey
+	15, // 11: sshcast.v1.RelayZellijStatus.sessions:type_name -> sshcast.v1.ZellijSessionInfo
+	16, // 12: sshcast.v1.ZellijHostList.hosts:type_name -> sshcast.v1.RelayZellijStatus
+	1,  // 13: sshcast.v1.ZellijTunnelFrame.frame_type:type_name -> sshcast.v1.ZellijFrameType
+	2,  // 14: sshcast.v1.ZellijTunnelFrame.sender_grant:type_name -> sshcast.v1.NodeGrant
+	3,  // 15: sshcast.v1.RelayStreamMessage.auth_handshake:type_name -> sshcast.v1.NodeAuth
+	16, // 16: sshcast.v1.RelayStreamMessage.zellij_status:type_name -> sshcast.v1.RelayZellijStatus
+	18, // 17: sshcast.v1.RelayStreamMessage.zellij_frame:type_name -> sshcast.v1.ZellijTunnelFrame
+	18, // 18: sshcast.v1.ServerToRelayMessage.zellij_frame:type_name -> sshcast.v1.ZellijTunnelFrame
+	3,  // 19: sshcast.v1.ClientStreamMessage.auth_handshake:type_name -> sshcast.v1.NodeAuth
+	12, // 20: sshcast.v1.ClientStreamMessage.status:type_name -> sshcast.v1.WorkstationStatus
+	13, // 21: sshcast.v1.ClientStreamMessage.sign_ack:type_name -> sshcast.v1.SignAck
+	11, // 22: sshcast.v1.ClientStreamMessage.sign_response:type_name -> sshcast.v1.SignResponse
+	18, // 23: sshcast.v1.ClientStreamMessage.zellij_frame:type_name -> sshcast.v1.ZellijTunnelFrame
+	10, // 24: sshcast.v1.ServerStreamMessage.sign_request:type_name -> sshcast.v1.SignRequest
+	14, // 25: sshcast.v1.ServerStreamMessage.cancel_sign_request:type_name -> sshcast.v1.CancelSignRequest
+	17, // 26: sshcast.v1.ServerStreamMessage.zellij_host_list:type_name -> sshcast.v1.ZellijHostList
+	18, // 27: sshcast.v1.ServerStreamMessage.zellij_frame:type_name -> sshcast.v1.ZellijTunnelFrame
+	8,  // 28: sshcast.v1.SshcastService.GetIdentities:input_type -> sshcast.v1.GetIdentitiesRequest
+	10, // 29: sshcast.v1.SshcastService.Sign:input_type -> sshcast.v1.SignRequest
+	21, // 30: sshcast.v1.SshcastService.ConnectWorkstation:input_type -> sshcast.v1.ClientStreamMessage
+	19, // 31: sshcast.v1.SshcastService.ConnectRelay:input_type -> sshcast.v1.RelayStreamMessage
+	9,  // 32: sshcast.v1.SshcastService.GetIdentities:output_type -> sshcast.v1.GetIdentitiesResponse
+	11, // 33: sshcast.v1.SshcastService.Sign:output_type -> sshcast.v1.SignResponse
+	22, // 34: sshcast.v1.SshcastService.ConnectWorkstation:output_type -> sshcast.v1.ServerStreamMessage
+	20, // 35: sshcast.v1.SshcastService.ConnectRelay:output_type -> sshcast.v1.ServerToRelayMessage
+	32, // [32:36] is the sub-list for method output_type
+	28, // [28:32] is the sub-list for method input_type
+	28, // [28:28] is the sub-list for extension type_name
+	28, // [28:28] is the sub-list for extension extendee
+	0,  // [0:28] is the sub-list for field type_name
 }
 
 func init() { file_sshcast_v1_sshcast_proto_init() }
@@ -1902,7 +1996,7 @@ func file_sshcast_v1_sshcast_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_sshcast_v1_sshcast_proto_rawDesc), len(file_sshcast_v1_sshcast_proto_rawDesc)),
 			NumEnums:      2,
-			NumMessages:   21,
+			NumMessages:   22,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

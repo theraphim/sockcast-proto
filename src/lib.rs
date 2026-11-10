@@ -5,6 +5,7 @@ pub mod v1 {
 pub mod bundle;
 pub mod crypto;
 pub(crate) mod des3_pem;
+pub mod dns;
 pub(crate) mod openssh_cipher;
 pub mod p2p;
 pub(crate) mod rsa_ssh;
@@ -45,6 +46,7 @@ mod tests {
             issued_at_unix_sec: 1_700_000_000,
             expires_at_unix_sec: 1_800_000_000,
             user_signature: Vec::new(),
+            user_cert: None,
         };
 
         sign_node_grant(&mut grant, &user_sk);
@@ -183,6 +185,7 @@ mod tests {
             issued_at_unix_sec: 1_700_000_000,
             expires_at_unix_sec: 0,
             user_signature: Vec::new(),
+            user_cert: None,
         };
         sign_node_grant(&mut grant, &user_sk);
 
@@ -224,6 +227,7 @@ mod tests {
             issued_at_unix_sec: 1_700_000_000,
             expires_at_unix_sec: 0,
             user_signature: Vec::new(),
+            user_cert: None,
         };
         sign_node_grant(&mut client_grant, &user_sk);
 
@@ -236,6 +240,7 @@ mod tests {
             issued_at_unix_sec: 1_700_000_000,
             expires_at_unix_sec: 0,
             user_signature: Vec::new(),
+            user_cert: None,
         };
         sign_node_grant(&mut relay_grant, &user_sk);
 
@@ -540,5 +545,106 @@ O/ovlk9wRix3IoPnrJfrDxYCOePLCipAMH2xbnNOPT+xA2MZg8a/tTAcFM+f9uEq
         let sig = key.sign_ssh_data(b"hello des3 rsa", 4).unwrap();
         key.verify_ssh_signature_blob(b"hello des3 rsa", &sig)
             .unwrap();
+    }
+
+    #[test]
+    fn test_dns_txt_parser_and_wire_codec() {
+        use super::dns::{
+            build_dns_txt_query, is_dns_discovery_entry, parse_dns_txt_response,
+            parse_txt_coordinator_records, txt_lookup_qname,
+        };
+
+        assert_eq!(
+            is_dns_discovery_entry("sshcast.net"),
+            Some("sshcast.net".to_string())
+        );
+        assert_eq!(
+            is_dns_discovery_entry("dns:sshcast.net"),
+            Some("sshcast.net".to_string())
+        );
+        assert_eq!(is_dns_discovery_entry("https://c1.sshcast.net"), None);
+        assert_eq!(txt_lookup_qname("sshcast.net"), "_sshcast.sshcast.net");
+        assert_eq!(
+            txt_lookup_qname("_sshcast.sshcast.net."),
+            "_sshcast.sshcast.net"
+        );
+
+        let kv_records = vec![
+            "v=sshcast1; coordinators=c1.sshcast.net,https://c2.sshcast.net/".to_string(),
+            "c3.sshcast.net c1.sshcast.net".to_string(),
+        ];
+        assert_eq!(
+            parse_txt_coordinator_records(&kv_records),
+            vec![
+                "https://c1.sshcast.net".to_string(),
+                "https://c2.sshcast.net".to_string(),
+                "https://c3.sshcast.net".to_string(),
+            ]
+        );
+
+        let query = build_dns_txt_query("_sshcast.sshcast.net", 0x4242).unwrap();
+        // Build a synthetic RFC 1035 response with compression pointer 0xC00C to question name
+        let mut resp = Vec::new();
+        resp.extend_from_slice(&0x4242u16.to_be_bytes());
+        resp.extend_from_slice(&0x8180u16.to_be_bytes()); // standard response, no error
+        resp.extend_from_slice(&1u16.to_be_bytes()); // QDCOUNT = 1
+        resp.extend_from_slice(&1u16.to_be_bytes()); // ANCOUNT = 1
+        resp.extend_from_slice(&0u16.to_be_bytes());
+        resp.extend_from_slice(&0u16.to_be_bytes());
+        resp.extend_from_slice(&query[12..]); // Echo question section
+        resp.extend_from_slice(&0xC00Cu16.to_be_bytes()); // Name pointer to offset 12
+        resp.extend_from_slice(&16u16.to_be_bytes()); // TYPE = TXT (16)
+        resp.extend_from_slice(&1u16.to_be_bytes()); // CLASS = IN (1)
+        resp.extend_from_slice(&300u32.to_be_bytes()); // TTL = 300
+        let txt_str = b"c1.sshcast.net c2.sshcast.net";
+        resp.extend_from_slice(&((txt_str.len() + 1) as u16).to_be_bytes()); // RDLENGTH
+        resp.push(txt_str.len() as u8);
+        resp.extend_from_slice(txt_str);
+
+        let (txts, truncated) = parse_dns_txt_response(&resp, 0x4242).unwrap();
+        assert!(!truncated);
+        assert_eq!(txts, vec!["c1.sshcast.net c2.sshcast.net".to_string()]);
+    }
+
+    #[test]
+    fn test_operator_user_cert_and_node_grant() {
+        use super::bundle::{decode_user_cert_token, encode_user_cert_token};
+        use super::crypto::{sign_user_cert, verify_user_cert};
+        use super::v1::UserCert;
+
+        let op_sk = SigningKey::from_bytes(&[0x55; 32]);
+        let user_sk = SigningKey::from_bytes(&[0x11; 32]);
+        let node_sk = SigningKey::from_bytes(&[0x22; 32]);
+        let user_pk = user_sk.verifying_key().to_bytes().to_vec();
+
+        let mut cert = UserCert {
+            user_id: derive_user_id(&user_pk),
+            user_pubkey: user_pk.clone(),
+            operator_pubkey: Vec::new(),
+            issued_at_unix_sec: 1_700_000_000,
+            expires_at_unix_sec: 1_800_000_000,
+            operator_signature: Vec::new(),
+        };
+        sign_user_cert(&mut cert, &op_sk);
+        assert!(verify_user_cert(&cert, &user_pk, 1_750_000_000).is_ok());
+
+        let token = encode_user_cert_token(&cert);
+        assert!(token.starts_with("sc_cert_"));
+        let decoded_cert = decode_user_cert_token(&token).unwrap();
+        assert_eq!(decoded_cert, cert);
+
+        let mut grant = NodeGrant {
+            user_id: String::new(),
+            user_pubkey: Vec::new(),
+            node_id: "macbook".to_string(),
+            role: NodeRole::Client as i32,
+            node_pubkey: node_sk.verifying_key().to_bytes().to_vec(),
+            issued_at_unix_sec: 1_700_000_000,
+            expires_at_unix_sec: 0,
+            user_signature: Vec::new(),
+            user_cert: Some(decoded_cert),
+        };
+        sign_node_grant(&mut grant, &user_sk);
+        assert!(verify_node_grant(&grant, 1_750_000_000).is_ok());
     }
 }

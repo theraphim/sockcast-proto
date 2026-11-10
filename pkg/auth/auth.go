@@ -1,20 +1,27 @@
 package auth
 
 import (
+	"bytes"
 	"crypto/ed25519"
+	"encoding/base64"
 	"encoding/binary"
 	"encoding/hex"
 	"errors"
 	"fmt"
 	"math"
+	"strings"
 
 	sshcastv1 "stingr.net/go/sshcast-proto/gen/go/sshcast/v1"
+	"google.golang.org/protobuf/proto"
 )
 
 const (
+	DomainUserCert    = "sshcast-user-cert-v1\x00"
 	DomainNodeGrant   = "sshcast-node-grant-v1\x00"
 	DomainNodeAuth    = "sshcast-rpc-auth-v1\x00"
 	DomainSignRequest = "sshcast-sign-request-v1\x00"
+
+	UserCertPrefix = "sc_cert_"
 
 	// DefaultMaxClockSkewMs is the default maximum allowed clock skew (5 minutes) for RPC auth tokens.
 	DefaultMaxClockSkewMs uint64 = 5 * 60 * 1000
@@ -22,6 +29,7 @@ const (
 
 var (
 	ErrNilGrant             = errors.New("node grant is nil")
+	ErrNilUserCert          = errors.New("user certificate is nil")
 	ErrNilAuth              = errors.New("node auth is nil")
 	ErrNilSignRequest       = errors.New("sign request is nil")
 	ErrInvalidKeyLength     = errors.New("invalid Ed25519 public key length (expected 32 bytes)")
@@ -29,6 +37,9 @@ var (
 	ErrEmptyIdentity        = errors.New("user_id or node_id is empty")
 	ErrUnspecifiedRole      = errors.New("node role is unspecified")
 	ErrGrantExpired         = errors.New("node grant has expired")
+	ErrUserCertExpired      = errors.New("user certificate has expired")
+	ErrInvalidUserCertSig   = errors.New("invalid operator signature on user certificate")
+	ErrUserCertPubkeyMismatch = errors.New("user certificate user_pubkey does not match node grant user_pubkey")
 	ErrInvalidGrantSig      = errors.New("invalid user signature on node grant")
 	ErrInvalidNodeAuthSig   = errors.New("invalid node signature on RPC auth")
 	ErrAuthTimestampSkew    = errors.New("RPC auth timestamp outside allowed clock skew window")
@@ -69,6 +80,98 @@ func appendBytes(buf []byte, data []byte) []byte {
 func appendString(buf []byte, s string) []byte {
 	buf = appendU32(buf, uint32(len(s)))
 	return append(buf, s...)
+}
+
+// CanonicalUserCertBytes returns the deterministic byte representation of a UserCert for Ed25519 operator signing.
+func CanonicalUserCertBytes(c *sshcastv1.UserCert) []byte {
+	buf := make([]byte, 0, 192)
+	buf = append(buf, DomainUserCert...)
+	buf = appendString(buf, c.GetUserId())
+	buf = appendBytes(buf, c.GetUserPubkey())
+	buf = appendBytes(buf, c.GetOperatorPubkey())
+	buf = appendU64(buf, c.GetIssuedAtUnixSec())
+	buf = appendU64(buf, c.GetExpiresAtUnixSec())
+	return buf
+}
+
+// SignUserCert signs c in-place using operatorPrivkey (64-byte Ed25519 private key).
+func SignUserCert(c *sshcastv1.UserCert, operatorPrivkey ed25519.PrivateKey) error {
+	if c == nil {
+		return ErrNilUserCert
+	}
+	if len(c.GetUserPubkey()) != ed25519.PublicKeySize {
+		return ErrInvalidKeyLength
+	}
+	c.OperatorPubkey = operatorPrivkey.Public().(ed25519.PublicKey)
+	if c.UserId == "" {
+		c.UserId = DeriveUserID(c.UserPubkey)
+	}
+	msg := CanonicalUserCertBytes(c)
+	c.OperatorSignature = ed25519.Sign(operatorPrivkey, msg)
+	return nil
+}
+
+// VerifyUserCert verifies a UserCert's structure, optional expected userPubkey, expiration, and operator Ed25519 signature.
+func VerifyUserCert(c *sshcastv1.UserCert, expectedUserPubkey []byte, nowUnixSec uint64) error {
+	if c == nil {
+		return ErrNilUserCert
+	}
+	if len(c.GetUserPubkey()) != ed25519.PublicKeySize || len(c.GetOperatorPubkey()) != ed25519.PublicKeySize {
+		return ErrInvalidKeyLength
+	}
+	if len(c.GetOperatorSignature()) != ed25519.SignatureSize {
+		return ErrInvalidSigLength
+	}
+	if c.GetUserId() == "" {
+		return ErrEmptyIdentity
+	}
+	if len(expectedUserPubkey) > 0 && !bytes.Equal(c.GetUserPubkey(), expectedUserPubkey) {
+		return ErrUserCertPubkeyMismatch
+	}
+	if c.GetExpiresAtUnixSec() > 0 && nowUnixSec > c.GetExpiresAtUnixSec() {
+		return ErrUserCertExpired
+	}
+	msg := CanonicalUserCertBytes(c)
+	if !ed25519.Verify(ed25519.PublicKey(c.GetOperatorPubkey()), msg, c.GetOperatorSignature()) {
+		return ErrInvalidUserCertSig
+	}
+	return nil
+}
+
+// EncodeUserCertToken encodes a signed UserCert into a compact sc_cert_<base64url> token string.
+func EncodeUserCertToken(c *sshcastv1.UserCert) (string, error) {
+	if c == nil {
+		return "", ErrNilUserCert
+	}
+	raw, err := proto.Marshal(c)
+	if err != nil {
+		return "", err
+	}
+	return UserCertPrefix + base64.RawURLEncoding.EncodeToString(raw), nil
+}
+
+// DecodeUserCertToken decodes an sc_cert_<base64url> token string into a UserCert.
+func DecodeUserCertToken(token string) (*sshcastv1.UserCert, error) {
+	trimmed := strings.TrimSpace(token)
+	for _, field := range strings.Fields(trimmed) {
+		if strings.HasPrefix(field, UserCertPrefix) {
+			trimmed = field
+			break
+		}
+	}
+	if !strings.HasPrefix(trimmed, UserCertPrefix) {
+		return nil, fmt.Errorf("user certificate token must start with %q", UserCertPrefix)
+	}
+	b64 := strings.TrimRight(strings.TrimPrefix(trimmed, UserCertPrefix), "=")
+	raw, err := base64.RawURLEncoding.DecodeString(b64)
+	if err != nil {
+		return nil, fmt.Errorf("invalid base64 in user certificate token: %w", err)
+	}
+	cert := &sshcastv1.UserCert{}
+	if err := proto.Unmarshal(raw, cert); err != nil {
+		return nil, fmt.Errorf("failed to decode UserCert protobuf: %w", err)
+	}
+	return cert, nil
 }
 
 // CanonicalNodeGrantBytes returns the deterministic byte representation of a NodeGrant for Ed25519 signing.
@@ -180,6 +283,11 @@ func VerifyNodeGrant(g *sshcastv1.NodeGrant, nowUnixSec uint64) error {
 	msg := CanonicalNodeGrantBytes(g)
 	if !ed25519.Verify(ed25519.PublicKey(g.GetUserPubkey()), msg, g.GetUserSignature()) {
 		return ErrInvalidGrantSig
+	}
+	if g.GetUserCert() != nil {
+		if err := VerifyUserCert(g.GetUserCert(), g.GetUserPubkey(), nowUnixSec); err != nil {
+			return err
+		}
 	}
 	return nil
 }

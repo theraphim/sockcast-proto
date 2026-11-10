@@ -1,9 +1,10 @@
-use crate::v1::{NodeAuth, NodeGrant, NodeRole, SignRequest, ZellijTunnelFrame};
+use crate::v1::{NodeAuth, NodeGrant, NodeRole, SignRequest, UserCert, ZellijTunnelFrame};
 use ed25519_dalek::{Signature, Signer, SigningKey, Verifier, VerifyingKey};
 #[cfg(not(target_arch = "wasm32"))]
 use rand::RngCore;
 use thiserror::Error;
 
+pub const DOMAIN_USER_CERT: &[u8] = b"sshcast-user-cert-v1\x00";
 pub const DOMAIN_NODE_GRANT: &[u8] = b"sshcast-node-grant-v1\x00";
 pub const DOMAIN_NODE_AUTH: &[u8] = b"sshcast-rpc-auth-v1\x00";
 pub const DOMAIN_SIGN_REQUEST: &[u8] = b"sshcast-sign-request-v1\x00";
@@ -15,6 +16,8 @@ pub const DEFAULT_MAX_CLOCK_SKEW_MS: u64 = 5 * 60 * 1000;
 pub enum CryptoError {
     #[error("missing node grant")]
     MissingGrant,
+    #[error("missing user certificate")]
+    MissingUserCert,
     #[error("invalid Ed25519 public key (expected 32 bytes)")]
     InvalidPublicKey,
     #[error("invalid Ed25519 signature (expected 64 bytes)")]
@@ -25,6 +28,12 @@ pub enum CryptoError {
     UnspecifiedRole,
     #[error("node grant has expired")]
     GrantExpired,
+    #[error("user certificate has expired")]
+    UserCertExpired,
+    #[error("invalid operator signature on user certificate")]
+    InvalidUserCertSignature,
+    #[error("user certificate user_pubkey does not match node grant user_pubkey")]
+    UserCertPubkeyMismatch,
     #[error("invalid user signature on node grant")]
     InvalidGrantSignature,
     #[error("invalid node signature on RPC auth")]
@@ -64,6 +73,66 @@ fn append_bytes(buf: &mut Vec<u8>, data: &[u8]) {
 
 fn append_str(buf: &mut Vec<u8>, s: &str) {
     append_bytes(buf, s.as_bytes());
+}
+
+/// Returns the deterministic canonical byte representation of a `UserCert` for Ed25519 operator signing.
+pub fn canonical_user_cert_bytes(c: &UserCert) -> Vec<u8> {
+    let mut buf = Vec::with_capacity(192);
+    buf.extend_from_slice(DOMAIN_USER_CERT);
+    append_str(&mut buf, &c.user_id);
+    append_bytes(&mut buf, &c.user_pubkey);
+    append_bytes(&mut buf, &c.operator_pubkey);
+    append_u64(&mut buf, c.issued_at_unix_sec);
+    append_u64(&mut buf, c.expires_at_unix_sec);
+    buf
+}
+
+/// Signs `cert` in-place using the swarm operator's Ed25519 `SigningKey`.
+pub fn sign_user_cert(cert: &mut UserCert, operator_signing_key: &SigningKey) {
+    let op_pk = operator_signing_key.verifying_key().to_bytes();
+    cert.operator_pubkey = op_pk.to_vec();
+    if cert.user_id.is_empty() && !cert.user_pubkey.is_empty() {
+        cert.user_id = derive_user_id(&cert.user_pubkey);
+    }
+    let msg = canonical_user_cert_bytes(cert);
+    let sig = operator_signing_key.sign(&msg);
+    cert.operator_signature = sig.to_bytes().to_vec();
+}
+
+/// Verifies a `UserCert`'s structure, optional expected `user_pubkey`, expiration, and operator Ed25519 signature.
+pub fn verify_user_cert(
+    cert: &UserCert,
+    expected_user_pubkey: &[u8],
+    now_unix_sec: u64,
+) -> Result<(), CryptoError> {
+    let _user_vk_bytes: [u8; 32] = cert
+        .user_pubkey
+        .as_slice()
+        .try_into()
+        .map_err(|_| CryptoError::InvalidPublicKey)?;
+    let op_vk_bytes: [u8; 32] = cert
+        .operator_pubkey
+        .as_slice()
+        .try_into()
+        .map_err(|_| CryptoError::InvalidPublicKey)?;
+    let op_vk = VerifyingKey::from_bytes(&op_vk_bytes).map_err(|_| CryptoError::InvalidPublicKey)?;
+    let sig = Signature::from_slice(&cert.operator_signature)
+        .map_err(|_| CryptoError::InvalidSignature)?;
+
+    if cert.user_id.is_empty() {
+        return Err(CryptoError::EmptyIdentity);
+    }
+    if !expected_user_pubkey.is_empty() && cert.user_pubkey.as_slice() != expected_user_pubkey {
+        return Err(CryptoError::UserCertPubkeyMismatch);
+    }
+    if cert.expires_at_unix_sec > 0 && now_unix_sec > cert.expires_at_unix_sec {
+        return Err(CryptoError::UserCertExpired);
+    }
+
+    let msg = canonical_user_cert_bytes(cert);
+    op_vk
+        .verify(&msg, &sig)
+        .map_err(|_| CryptoError::InvalidUserCertSignature)
 }
 
 /// Returns the deterministic canonical byte representation of a `NodeGrant` for Ed25519 signing.
@@ -193,7 +262,11 @@ pub fn verify_node_grant(grant: &NodeGrant, now_unix_sec: u64) -> Result<(), Cry
     let msg = canonical_node_grant_bytes(grant);
     user_vk
         .verify(&msg, &sig)
-        .map_err(|_| CryptoError::InvalidGrantSignature)
+        .map_err(|_| CryptoError::InvalidGrantSignature)?;
+    if let Some(cert) = &grant.user_cert {
+        verify_user_cert(cert, &grant.user_pubkey, now_unix_sec)?;
+    }
+    Ok(())
 }
 
 /// Signs a `NodeAuth` in-place using the node's Ed25519 `SigningKey`.

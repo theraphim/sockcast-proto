@@ -9,6 +9,16 @@ enum NodeRole {
   NODE_ROLE_CLIENT = 2;
 }
 
+// Signed by the Swarm Operator's Ed25519 private key to authorize a User's Root public key.
+message UserCert {
+  string user_id = 1;               // Derived from or paired with user_pubkey
+  bytes user_pubkey = 2;            // 32-byte Ed25519 user root public key
+  bytes operator_pubkey = 3;        // 32-byte Ed25519 operator public key
+  uint64 issued_at_unix_sec = 4;
+  uint64 expires_at_unix_sec = 5;   // 0 = no expiration
+  bytes operator_signature = 6;     // 64-byte Ed25519 signature by operator_privkey
+}
+
 // Signed by the User's Root Ed25519 private key.
 message NodeGrant {
   string user_id = 1;               // Derived from or paired with user_pubkey
@@ -19,6 +29,7 @@ message NodeGrant {
   uint64 issued_at_unix_sec = 6;
   uint64 expires_at_unix_sec = 7;   // 0 = no expiration
   bytes user_signature = 8;         // 64-byte Ed25519 signature by user_privkey
+  UserCert user_cert = 9;           // Optional operator-signed certificate authorizing user_pubkey
 }
 
 // Attached to RPC calls to prove possession of node_privkey.

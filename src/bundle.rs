@@ -1,4 +1,4 @@
-use crate::v1::NodeGrant;
+use crate::v1::{NodeGrant, UserCert};
 use base64::engine::general_purpose::URL_SAFE_NO_PAD;
 use base64::Engine;
 use ed25519_dalek::SigningKey;
@@ -7,11 +7,14 @@ use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
 pub const BUNDLE_PREFIX: &str = "sc1_";
+pub const USER_CERT_PREFIX: &str = "sc_cert_";
 
 #[derive(Debug, Error)]
 pub enum BundleError {
     #[error("enrollment bundle must start with '{BUNDLE_PREFIX}'")]
     InvalidPrefix,
+    #[error("user certificate token must start with '{USER_CERT_PREFIX}'")]
+    InvalidUserCertPrefix,
     #[error("base64 decode error: {0}")]
     Base64(#[from] base64::DecodeError),
     #[error("json serialization error: {0}")]
@@ -20,6 +23,29 @@ pub enum BundleError {
     Protobuf(#[from] prost::DecodeError),
     #[error("invalid node private key seed (expected 32 bytes)")]
     InvalidPrivateKeySeed,
+}
+
+/// Encodes a signed `UserCert` into a compact `sc_cert_<base64url>` token string.
+pub fn encode_user_cert_token(cert: &UserCert) -> String {
+    let mut bytes = Vec::new();
+    cert.encode(&mut bytes)
+        .expect("prost encode cannot fail on Vec");
+    format!("{USER_CERT_PREFIX}{}", URL_SAFE_NO_PAD.encode(bytes))
+}
+
+/// Decodes an `sc_cert_<base64url>` token string into a `UserCert`.
+pub fn decode_user_cert_token(token: &str) -> Result<UserCert, BundleError> {
+    let candidate = token
+        .split_whitespace()
+        .find(|w| w.starts_with(USER_CERT_PREFIX))
+        .unwrap_or_else(|| token.trim());
+    let cleaned: String = candidate.chars().filter(|c| !c.is_whitespace()).collect();
+    let b64_part = cleaned
+        .strip_prefix(USER_CERT_PREFIX)
+        .ok_or(BundleError::InvalidUserCertPrefix)?;
+    let raw = URL_SAFE_NO_PAD.decode(b64_part.trim_end_matches('='))?;
+    let cert = UserCert::decode(raw.as_slice())?;
+    Ok(cert)
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
