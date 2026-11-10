@@ -1,5 +1,6 @@
 use crate::v1::{NodeAuth, NodeGrant, NodeRole, SignRequest, ZellijTunnelFrame};
 use ed25519_dalek::{Signature, Signer, SigningKey, Verifier, VerifyingKey};
+#[cfg(not(target_arch = "wasm32"))]
 use rand::RngCore;
 use thiserror::Error;
 
@@ -206,14 +207,13 @@ pub fn sign_node_auth(auth: &mut NodeAuth, node_signing_key: &SigningKey) -> Res
     Ok(())
 }
 
-/// Creates and signs a fresh `NodeAuth` token with a random 16-byte nonce.
-pub fn create_node_auth(
+/// Creates and signs a fresh `NodeAuth` token with an explicit nonce.
+pub fn create_node_auth_with_nonce(
     grant: NodeGrant,
     node_signing_key: &SigningKey,
     timestamp_unix_ms: u64,
+    nonce: Vec<u8>,
 ) -> Result<NodeAuth, CryptoError> {
-    let mut nonce = vec![0u8; 16];
-    rand::thread_rng().fill_bytes(&mut nonce);
     let mut auth = NodeAuth {
         grant: Some(grant),
         timestamp_unix_ms,
@@ -222,6 +222,18 @@ pub fn create_node_auth(
     };
     sign_node_auth(&mut auth, node_signing_key)?;
     Ok(auth)
+}
+
+/// Creates and signs a fresh `NodeAuth` token with a random 16-byte nonce.
+#[cfg(not(target_arch = "wasm32"))]
+pub fn create_node_auth(
+    grant: NodeGrant,
+    node_signing_key: &SigningKey,
+    timestamp_unix_ms: u64,
+) -> Result<NodeAuth, CryptoError> {
+    let mut nonce = vec![0u8; 16];
+    rand::thread_rng().fill_bytes(&mut nonce);
+    create_node_auth_with_nonce(grant, node_signing_key, timestamp_unix_ms, nonce)
 }
 
 /// Verifies a `NodeAuth` token including its embedded `NodeGrant`, role, timestamp skew, and signature.

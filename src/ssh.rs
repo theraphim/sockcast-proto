@@ -3,6 +3,7 @@ use crate::v1::{PublicKey, SshAuthContext};
 use base64::engine::general_purpose::{STANDARD, STANDARD_NO_PAD};
 use base64::Engine;
 use ed25519_dalek::{Signature, Signer, SigningKey, Verifier, VerifyingKey};
+#[cfg(not(target_arch = "wasm32"))]
 use rand::rngs::OsRng;
 use sha2::{Digest, Sha256};
 use thiserror::Error;
@@ -60,6 +61,7 @@ impl LoadedSshKey {
     }
 
     /// Generates a fresh random `ssh-ed25519` private key.
+    #[cfg(not(target_arch = "wasm32"))]
     pub fn generate_ed25519(comment: impl Into<String>) -> Self {
         let signing_key = SigningKey::generate(&mut OsRng);
         Self::from_ed25519_signing_key(signing_key, comment)

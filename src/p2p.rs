@@ -1,5 +1,6 @@
 use base64::engine::general_purpose::URL_SAFE_NO_PAD;
 use base64::Engine;
+#[cfg(not(target_arch = "wasm32"))]
 use rand::RngCore;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
@@ -29,6 +30,7 @@ pub struct P2pEndpointHandshake {
 }
 
 impl P2pEndpointHandshake {
+    #[cfg(not(target_arch = "wasm32"))]
     pub fn new(tcp_candidates: Vec<String>, udp_candidates: Vec<String>) -> Self {
         let mut secret = [0u8; 32];
         rand::rngs::OsRng.fill_bytes(&mut secret);
@@ -120,6 +122,7 @@ impl P2pStreamCipher {
 }
 
 /// Builds a 20-byte RFC 5389 STUN Binding Request packet and returns `(packet, transaction_id)`.
+#[cfg(not(target_arch = "wasm32"))]
 pub fn build_stun_binding_request() -> ([u8; 20], [u8; 12]) {
     let mut tx_id = [0u8; 12];
     rand::rngs::OsRng.fill_bytes(&mut tx_id);

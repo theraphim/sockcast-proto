@@ -7,6 +7,7 @@ pub mod crypto;
 pub(crate) mod openssh_cipher;
 pub mod p2p;
 pub mod ssh;
+pub mod wasm;
 
 #[cfg(test)]
 mod tests {
@@ -433,5 +434,172 @@ mod tests {
             .unwrap();
 
         let _ = std::fs::remove_dir_all(&tmp_dir);
+    }
+
+    #[test]
+    fn test_wasm_workstation_engine_flow() {
+        use super::ssh::LoadedSshKey;
+        use super::v1::{
+            client_stream_message, server_stream_message, ClientStreamMessage, ServerStreamMessage,
+        };
+        use super::wasm::WasmWorkstationEngine;
+        use base64::engine::general_purpose::STANDARD;
+        use base64::Engine;
+        use prost::Message;
+        use serde_json::{json, Value};
+
+        let user_sk = SigningKey::from_bytes(&[0x51; 32]);
+        let client_sk = SigningKey::from_bytes(&[0x52; 32]);
+        let relay_sk = SigningKey::from_bytes(&[0x53; 32]);
+        let ssh_key = LoadedSshKey::from_ed25519_signing_key(
+            SigningKey::from_bytes(&[0x66; 32]),
+            "browser@chrome",
+        );
+
+        let mut client_grant = NodeGrant {
+            user_id: derive_user_id(&user_sk.verifying_key().to_bytes()),
+            user_pubkey: user_sk.verifying_key().to_bytes().to_vec(),
+            node_id: "chrome-workstation".to_string(),
+            role: NodeRole::Client as i32,
+            node_pubkey: client_sk.verifying_key().to_bytes().to_vec(),
+            issued_at_unix_sec: 1_700_000_000,
+            expires_at_unix_sec: 0,
+            user_signature: Vec::new(),
+        };
+        sign_node_grant(&mut client_grant, &user_sk);
+
+        let bundle = EnrollmentBundle::new(
+            vec!["https://coord.example.com:8443".to_string()],
+            client_sk,
+            client_grant,
+        );
+        let bundle_token = bundle.encode().unwrap();
+
+        let mut engine = WasmWorkstationEngine::new();
+
+        // 1. Set enrollment bundle
+        let r1 = engine.call_value(json!({
+            "op": "set_bundle",
+            "bundle_str": bundle_token,
+            "now_unix_sec": 1_750_000_000u64,
+        }));
+        assert_eq!(r1["ok"], Value::Bool(true));
+        assert_eq!(r1["ws_url"], "wss://coord.example.com:8443/ws/workstation");
+        assert_eq!(r1["node_id"], "chrome-workstation");
+
+        // 2. Add OpenSSH key
+        let pem = ssh_key.to_openssh_pem();
+        let r2 = engine.call_value(json!({
+            "op": "add_ssh_key",
+            "pem": pem,
+        }));
+        assert_eq!(r2["ok"], Value::Bool(true));
+        assert_eq!(r2["keys"].as_array().unwrap().len(), 1);
+
+        // 3. Build AuthHandshake frame and verify it with verify_node_auth
+        let r3 = engine.call_value(json!({
+            "op": "build_auth_handshake_frame",
+            "now_unix_ms": 1_750_000_000_000u64,
+        }));
+        assert_eq!(r3["ok"], Value::Bool(true));
+        let hs_bytes = STANDARD.decode(r3["frame_b64"].as_str().unwrap()).unwrap();
+        let hs_msg = ClientStreamMessage::decode(hs_bytes.as_slice()).unwrap();
+        let Some(client_stream_message::Payload::AuthHandshake(node_auth)) = hs_msg.payload else {
+            panic!("expected AuthHandshake payload");
+        };
+        verify_node_auth(
+            &node_auth,
+            Some(NodeRole::Client),
+            1_750_000_000_500,
+            DEFAULT_MAX_CLOCK_SKEW_MS,
+        )
+        .unwrap();
+
+        // 4. Build WorkstationStatus frame
+        let r4 = engine.call_value(json!({
+            "op": "build_status_frame",
+            "last_input_epoch_ms": 1_750_000_000_000u64,
+            "force_active": true,
+        }));
+        assert_eq!(r4["ok"], Value::Bool(true));
+        let st_bytes = STANDARD.decode(r4["frame_b64"].as_str().unwrap()).unwrap();
+        let st_msg = ClientStreamMessage::decode(st_bytes.as_slice()).unwrap();
+        let Some(client_stream_message::Payload::Status(st)) = st_msg.payload else {
+            panic!("expected Status payload");
+        };
+        assert!(st.force_active);
+        assert_eq!(st.keys.len(), 1);
+        assert_eq!(st.keys[0].comment, "browser@chrome");
+
+        // 5. Decode incoming SignRequest frame from server
+        let mut relay_grant = NodeGrant {
+            user_id: derive_user_id(&user_sk.verifying_key().to_bytes()),
+            user_pubkey: user_sk.verifying_key().to_bytes().to_vec(),
+            node_id: "bastion.infra.local".to_string(),
+            role: NodeRole::Relay as i32,
+            node_pubkey: relay_sk.verifying_key().to_bytes().to_vec(),
+            issued_at_unix_sec: 1_700_000_000,
+            expires_at_unix_sec: 0,
+            user_signature: Vec::new(),
+        };
+        sign_node_grant(&mut relay_grant, &user_sk);
+
+        let challenge = b"browser-wasm-sign-challenge";
+        let mut sign_req = SignRequest {
+            request_id: "req-wasm-1".to_string(),
+            timestamp_unix_ms: 1_750_000_000_000,
+            key_blob: ssh_key.key_blob().to_vec(),
+            data: challenge.to_vec(),
+            flags: 0,
+            process_context: Some(ProcessContext {
+                hostname: "bastion.infra.local".to_string(),
+                uid: 1000,
+                pid: 9001,
+                comm: "ssh".to_string(),
+                cmdline: "ssh prod-db".to_string(),
+                cwd: "/home/pavel".to_string(),
+                ancestors: vec![ProcessAncestor {
+                    pid: 9000,
+                    comm: "git".to_string(),
+                    cmdline: "git push origin main".to_string(),
+                }],
+            }),
+            ssh_auth_context: None,
+            relay_grant: Some(relay_grant),
+            relay_signature: Vec::new(),
+            auth: None,
+        };
+        sign_sign_request(&mut sign_req, &relay_sk).unwrap();
+
+        let srv_frame = ServerStreamMessage {
+            payload: Some(server_stream_message::Payload::SignRequest(sign_req)),
+        };
+        let r5 = engine.call_value(json!({
+            "op": "decode_server_frame",
+            "frame_b64": STANDARD.encode(srv_frame.encode_to_vec()),
+            "now_unix_sec": 1_750_000_000u64,
+        }));
+        assert_eq!(r5["ok"], Value::Bool(true));
+        assert_eq!(r5["frame_type"], "sign_request");
+        assert_eq!(r5["request"]["primary_tool"], "git");
+        assert_eq!(r5["request"]["has_matching_key"], Value::Bool(true));
+
+        // 6. Approve and verify signature blob
+        let r6 = engine.call_value(json!({
+            "op": "decide_sign_request",
+            "request_id": "req-wasm-1",
+            "approved": true,
+        }));
+        assert_eq!(r6["ok"], Value::Bool(true));
+        let resp_bytes = STANDARD.decode(r6["frame_b64"].as_str().unwrap()).unwrap();
+        let resp_msg = ClientStreamMessage::decode(resp_bytes.as_slice()).unwrap();
+        let Some(client_stream_message::Payload::SignResponse(sr)) = resp_msg.payload else {
+            panic!("expected SignResponse payload");
+        };
+        assert!(sr.approved);
+        assert_eq!(sr.handled_by_node_id, "chrome-workstation");
+        ssh_key
+            .verify_ssh_signature_blob(challenge, &sr.signature_blob)
+            .unwrap();
     }
 }

@@ -372,6 +372,7 @@ impl NodeRole {
     }
 }
 /// Generated client implementations.
+#[cfg(not(target_arch = "wasm32"))]
 pub mod sockcast_service_client {
     #![allow(
         unused_variables,
@@ -569,6 +570,7 @@ pub mod sockcast_service_client {
     }
 }
 /// Generated server implementations.
+#[cfg(not(target_arch = "wasm32"))]
 pub mod sockcast_service_server {
     #![allow(
         unused_variables,
